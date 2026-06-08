@@ -31,7 +31,6 @@ Route::prefix('auth')->group(function () {
 // ROUTES AUTHENTIFIÉES
 // ===================================================================
 Route::middleware('auth:sanctum')->group(function () {
-    });
 
     // ------ AUTHENTIFICATION ------
     Route::prefix('auth')->group(function () {
@@ -122,3 +121,4 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/avis', [AvisController::class, 'stats']);
         Route::get('/abonnements', [AbonnementController::class, 'stats']);
     });
+});
