@@ -47,7 +47,8 @@ export default function Reservations() {
       {/* Header - Zraq w Byad */}
       <div className="mb-8 border-b border-slate-200 pb-5">
         <h1 className="text-3xl font-extrabold text-blue-900 tracking-tight flex items-center gap-3">
-          📅 Planification des Réservations
+          <i className="fa-solid fa-calendar-days text-blue-600" />
+          Planification des Réservations
         </h1>
         <p className="text-sm text-slate-500 mt-1">
           Gérer le planning des lavages, estimer les prix et suivre les statuts opérationnels
@@ -57,7 +58,8 @@ export default function Reservations() {
       {/* FORMULAIRE D'AJOUT (Style Clean w Pro) */}
       <div className="bg-white p-6 rounded-2xl border border-blue-100 shadow-sm mb-8 max-w-5xl">
         <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-          ➕ Créer une nouvelle réservation
+          <i className="fa-solid fa-plus text-blue-600" />
+          Créer une nouvelle réservation
         </h2>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -149,12 +151,15 @@ export default function Reservations() {
       {/* TABLEAU DES RÉSERVATIONS (Style Pro) */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="p-5 border-b border-slate-100 bg-slate-50/50">
-          <h2 className="text-lg font-bold text-slate-800">📋 Planning des réservations</h2>
+          <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+            <i className="fa-solid fa-list-check text-blue-600" />
+            Planning des réservations
+          </h2>
         </div>
 
         {reservations.length === 0 ? (
           <div className="p-8 text-center text-slate-400 text-sm">
-            ❌ Aucune réservation enregistrée.
+            <i className="fa-solid fa-circle-exclamation mr-2" /> Aucune réservation enregistrée.
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -177,7 +182,7 @@ export default function Reservations() {
                     <td className="py-4 px-6 font-medium text-slate-700">{r.service}</td>
                     <td className="py-4 px-6 text-slate-500 text-xs">
                       <span className="bg-slate-100 px-2 py-1 rounded text-slate-700 font-medium">{r.date_debut}</span>
-                      <span className="mx-1 text-slate-400">➔</span>
+                      <span className="mx-1 text-slate-400"><i className="fa-solid fa-arrow-right" /></span>
                       <span className="bg-slate-100 px-2 py-1 rounded text-slate-700 font-medium">{r.date_fin}</span>
                     </td>
                     <td className="py-4 px-6 font-black text-blue-700">{r.prix_estime} DH</td>

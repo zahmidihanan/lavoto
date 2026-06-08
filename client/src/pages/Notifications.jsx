@@ -41,7 +41,8 @@ export default function Notifications() {
       {/* Header - Zraq w Byad */}
       <div className="mb-8 border-b border-slate-200 pb-5">
         <h1 className="text-3xl font-extrabold text-blue-900 tracking-tight flex items-center gap-3">
-          🔔 Centre de Notifications
+          <i className="fa-solid fa-bell text-blue-600" />
+          Centre de Notifications
         </h1>
         <p className="text-sm text-slate-500 mt-1">
           Diffusez des alertes aux clients, gerez les canaux d'envoi (App, SMS, Email) et suivez l'état de lecture.
@@ -51,7 +52,8 @@ export default function Notifications() {
       {/* FORMULAIRE (Style Clean & Organized) */}
       <div className="bg-white p-6 rounded-2xl border border-blue-100 shadow-sm mb-8 max-w-4xl">
         <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-          📢 Envoyer une nouvelle alerte
+          <i className="fa-solid fa-bullhorn text-blue-600" />
+          Envoyer une nouvelle alerte
         </h2>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
@@ -76,9 +78,9 @@ export default function Notifications() {
               value={form.canal}
               onChange={(e) => setForm({ ...form, canal: e.target.value })}
             >
-              <option value="app">📱 Notification App</option>
-              <option value="email">📧 Email Marketing</option>
-              <option value="sms">💬 Message SMS</option>
+              <option value="app">Notification App</option>
+              <option value="email">Email Marketing</option>
+              <option value="sms">Message SMS</option>
             </select>
           </div>
 
@@ -98,11 +100,14 @@ export default function Notifications() {
 
       {/* LISTE DES NOTIFICATIONS */}
       <div className="max-w-4xl">
-        <h2 className="text-lg font-bold text-slate-800 mb-4">📋 Historique des envois ({notifs.length})</h2>
+        <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+          <i className="fa-solid fa-list-check text-blue-600" />
+          Historique des envois ({notifs.length})
+        </h2>
         
         {notifs.length === 0 ? (
-          <div className="bg-white p-8 text-center text-slate-400 text-sm rounded-2xl border border-slate-200">
-            ❌ Aucune notification envoyée.
+          <div className="bg-white p-8 text-center text-slate-400 text-sm rounded-2xl border border-slate-200 flex items-center justify-center gap-2">
+            <i className="fa-solid fa-circle-exclamation" /> Aucune notification envoyée.
           </div>
         ) : (
           <div className="flex flex-col gap-3">
@@ -135,13 +140,15 @@ export default function Notifications() {
                   {!n.lu ? (
                     <button
                       onClick={() => markAsLu(n.id)}
-                      className="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg transition font-medium"
+                      className="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg transition font-medium flex items-center gap-2"
                     >
+                      <i className="fa-solid fa-check" />
                       Marquer lu
                     </button>
                   ) : (
-                    <span className="text-xs text-green-600 font-medium bg-green-50 px-2.5 py-1 rounded-lg border border-green-100">
-                      ✓ Lu
+                    <span className="text-xs text-green-600 font-medium bg-green-50 px-2.5 py-1 rounded-lg border border-green-100 flex items-center gap-1">
+                      <i className="fa-solid fa-check-circle" />
+                      Lu
                     </span>
                   )}
                 </div>

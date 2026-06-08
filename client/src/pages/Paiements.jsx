@@ -35,7 +35,8 @@ export default function Paiements() {
       {/* Header - Zraq w Byad */}
       <div className="mb-8 border-b border-slate-200 pb-5">
         <h1 className="text-3xl font-extrabold text-blue-900 tracking-tight flex items-center gap-3">
-          💳 Suivi des Paiements
+          <i className="fa-solid fa-credit-card text-blue-600" />
+          Suivi des Paiements
         </h1>
         <p className="text-sm text-slate-500 mt-1">
           Enregistrer les transactions, suivre les paiements partiels et valider les encaissements par facture.
@@ -45,7 +46,8 @@ export default function Paiements() {
       {/* FORMULAIRE (Style Clean & Organized) */}
       <div className="bg-white p-6 rounded-2xl border border-blue-100 shadow-sm mb-8 max-w-4xl">
         <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-          ➕ Enregistrer un encaissement
+          <i className="fa-solid fa-plus text-blue-600" />
+          Enregistrer un encaissement
         </h2>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
@@ -82,9 +84,9 @@ export default function Paiements() {
               value={form.methode}
               onChange={(e) => setForm({ ...form, methode: e.target.value })}
             >
-              <option value="Cash">💵 Cash</option>
-              <option value="Card">💳 Carte Bancaire</option>
-              <option value="Online">🌐 En ligne (App/Web)</option>
+              <option value="Cash">Cash</option>
+              <option value="Card">Carte Bancaire</option>
+              <option value="Online">En ligne (App/Web)</option>
             </select>
           </div>
 
@@ -105,12 +107,15 @@ export default function Paiements() {
       {/* TABLEAU DES TRANSACTIONS */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="p-5 border-b border-slate-100 bg-slate-50/50">
-          <h2 className="text-lg font-bold text-slate-800">📋 Historique des flux de caisse</h2>
+          <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+            <i className="fa-solid fa-list-check text-blue-600" />
+            Historique des flux de caisse
+          </h2>
         </div>
 
         {paiements.length === 0 ? (
           <div className="p-8 text-center text-slate-400 text-sm">
-            ❌ Aucun flux enregistré.
+            <i className="fa-solid fa-circle-exclamation mr-2" /> Aucun flux enregistré.
           </div>
         ) : (
           <div className="overflow-x-auto">

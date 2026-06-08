@@ -53,7 +53,8 @@ export default function Factures() {
       {/* Header - Zraq w Byad */}
       <div className="mb-8 border-b border-slate-200 pb-5">
         <h1 className="text-3xl font-extrabold text-blue-900 tracking-tight flex items-center gap-3">
-          🧾 Gestion Financière & Facturation
+          <i className="fa-solid fa-file-invoice-dollar text-blue-600" />
+          Gestion Financière & Facturation
         </h1>
         <p className="text-sm text-slate-500 mt-1">
           Générez des factures fiables, gérez la TVA, les frais de déplacement et suivez les règlements.
@@ -63,7 +64,8 @@ export default function Factures() {
       {/* FORMULAIRE (Style Clean & Organized) */}
       <div className="bg-white p-6 rounded-2xl border border-blue-100 shadow-sm mb-8 max-w-5xl">
         <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-          ➕ Émettre une nouvelle facture
+          <i className="fa-solid fa-plus text-blue-600" />
+          Émettre une nouvelle facture
         </h2>
         
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
@@ -133,12 +135,15 @@ export default function Factures() {
       {/* TABLEAU DES FACTURES */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="p-5 border-b border-slate-100 bg-slate-50/50">
-          <h2 className="text-lg font-bold text-slate-800">📋 Liste des factures émises</h2>
+          <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+            <i className="fa-solid fa-list-check text-blue-600" />
+            Liste des factures émises
+          </h2>
         </div>
 
         {factures.length === 0 ? (
           <div className="p-8 text-center text-slate-400 text-sm">
-            ❌ Aucune facture enregistrée pour le moment.
+            <i className="fa-solid fa-circle-exclamation mr-2" /> Aucune facture enregistrée pour le moment.
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -175,9 +180,9 @@ export default function Factures() {
                       {f.statut === "non_payé" ? (
                         <button
                           onClick={() => markPaid(f.id)}
-                          className="bg-blue-50 hover:bg-blue-100 text-blue-600 text-xs font-bold px-3 py-1.5 rounded-lg transition"
+                          className="bg-blue-50 hover:bg-blue-100 text-blue-600 text-xs font-bold px-3 py-1.5 rounded-lg transition flex items-center gap-2"
                         >
-                          💳 Encaisser
+                          <i className="fa-solid fa-money-bill-trend-up" /> Encaisser
                         </button>
                       ) : (
                         <span className="text-slate-400 text-xs italic">Aucune action</span>

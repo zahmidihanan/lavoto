@@ -37,7 +37,8 @@ export default function DashboardHome() {
       {/* Header - Zraq w Byad */}
       <div className="mb-8 border-b border-slate-200 pb-5">
         <h1 className="text-3xl font-extrabold text-blue-900 tracking-tight flex items-center gap-3">
-          🧼 Lavoto Dashboard
+          <i className="fa-solid fa-chart-line text-blue-600" />
+          Lavoto Dashboard
         </h1>
         <p className="text-sm text-slate-500 mt-1">
           Suivi opérationnel et financier en temps réel
@@ -53,7 +54,9 @@ export default function DashboardHome() {
             <p className="text-xs font-bold text-blue-600 uppercase tracking-wider">Véhicules</p>
             <h3 className="text-3xl font-black text-slate-800 mt-1">{vehiculesCount}</h3>
           </div>
-          <div className="bg-blue-50 text-blue-600 p-3 rounded-xl text-2xl font-semibold">🚘</div>
+          <div className="bg-blue-50 text-blue-600 p-3 rounded-xl text-2xl font-semibold">
+            <i className="fa-solid fa-car" />
+          </div>
         </div>
 
         {/* Card 2: Réservations */}
@@ -62,7 +65,9 @@ export default function DashboardHome() {
             <p className="text-xs font-bold text-blue-600 uppercase tracking-wider">Réservations</p>
             <h3 className="text-3xl font-black text-slate-800 mt-1">{reservationsCount}</h3>
           </div>
-          <div className="bg-blue-50 text-blue-600 p-3 rounded-xl text-2xl font-semibold">📅</div>
+          <div className="bg-blue-50 text-blue-600 p-3 rounded-xl text-2xl font-semibold">
+            <i className="fa-solid fa-calendar-days" />
+          </div>
         </div>
 
         {/* Card 3: Factures & Chiffre d'affaires */}
@@ -71,7 +76,9 @@ export default function DashboardHome() {
             <p className="text-xs font-bold text-blue-600 uppercase tracking-wider">Paiements Reçus</p>
             <h3 className="text-3xl font-black text-blue-700 mt-1">{paiementsTotal} DH</h3>
           </div>
-          <div className="bg-emerald-50 text-emerald-600 p-3 rounded-xl text-2xl font-semibold">💳</div>
+          <div className="bg-emerald-50 text-emerald-600 p-3 rounded-xl text-2xl font-semibold">
+            <i className="fa-solid fa-credit-card" />
+          </div>
         </div>
 
         {/* Card 4: Utilisateurs */}
@@ -80,7 +87,9 @@ export default function DashboardHome() {
             <p className="text-xs font-bold text-blue-600 uppercase tracking-wider">Utilisateurs</p>
             <h3 className="text-3xl font-black text-slate-800 mt-1">{usersCount}</h3>
           </div>
-          <div className="bg-blue-50 text-blue-600 p-3 rounded-xl text-2xl font-semibold">👤</div>
+          <div className="bg-blue-50 text-blue-600 p-3 rounded-xl text-2xl font-semibold">
+            <i className="fa-solid fa-user" />
+          </div>
         </div>
 
       </div>
@@ -88,7 +97,8 @@ export default function DashboardHome() {
       {/* Section jdida dial l-Moraqaba (Suivi des Statuts) kima 3ndek f l-wti9a */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
         <h2 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
-          🕒 Historique des Statuts & Activités
+          <i className="fa-solid fa-clock" />
+          Historique des Statuts & Activités
         </h2>
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">

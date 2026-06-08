@@ -1,17 +1,39 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function Vehicules() {
-  const [vehicules, setVehicules] = useState([
-    // Derthalik fiha chi data mtal ghir bach t-choufi l-design s7i7 kifax k-yban
-    { id: 1, immatriculation: "12345-أ-6", kilometrage: "120000", commentaire: "Carrosserie propre" },
-    { id: 2, immatriculation: "67890-ب-44", kilometrage: "85000", commentaire: "Rayure sur la portière droite" }
-  ]);
+  const [vehicules, setVehicules] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const [form, setForm] = useState({
     immatriculation: "",
     kilometrage: "",
-    commentaire: "" // Zdna l-commentaire kima 3ndek f l-base de données
+    commentaire: ""
   });
+
+  useEffect(() => {
+    async function loadVehicules() {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const response = await fetch("http://127.0.0.1:8000/api/vehicules");
+        if (!response.ok) {
+          throw new Error(`API error ${response.status}`);
+        }
+
+        const data = await response.json();
+        setVehicules(data.vehicules || []);
+      } catch (fetchError) {
+        setError("Impossible de charger les véhicules depuis l'API.");
+        console.error(fetchError);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadVehicules();
+  }, []);
 
   const addVehicule = () => {
     if (!form.immatriculation) return;
@@ -34,7 +56,8 @@ export default function Vehicules() {
       {/* Header - Zraq w Byad */}
       <div className="mb-8 border-b border-slate-200 pb-5">
         <h1 className="text-3xl font-extrabold text-blue-900 tracking-tight flex items-center gap-3">
-          🚘 Gestion des Véhicules
+          <i className="fa-solid fa-car-side text-blue-600" />
+          Gestion des Véhicules
         </h1>
         <p className="text-sm text-slate-500 mt-1">
           Ajouter, modifier et suivre le kilométrage et l'état des véhicules clients
@@ -44,7 +67,8 @@ export default function Vehicules() {
       {/* SECTION FORMULAIRE (Form b Thème Zraq w Byad Clean) */}
       <div className="bg-white p-6 rounded-2xl border border-blue-100 shadow-sm mb-8 max-w-4xl">
         <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-          ➕ Ajouter un nouveau véhicule
+          <i className="fa-solid fa-plus text-blue-600" />
+          Ajouter un nouveau véhicule
         </h2>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
@@ -102,12 +126,23 @@ export default function Vehicules() {
       {/* SECTION TABLEAU DES VÉHICULES (I7tirafi) */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="p-5 border-b border-slate-100 bg-slate-50/50">
-          <h2 className="text-lg font-bold text-slate-800">📋 Liste des véhicules enregistrés</h2>
+          <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+            <i className="fa-solid fa-list-check text-blue-600" />
+            Liste des véhicules enregistrés
+          </h2>
         </div>
 
-        {vehicules.length === 0 ? (
-          <div className="p-8 text-center text-slate-400 text-sm">
-            ❌ Aucun véhicule enregistré pour le moment.
+        {error ? (
+          <div className="p-8 text-center text-red-500 text-sm">
+            <i className="fa-solid fa-triangle-exclamation mr-2" /> {error}
+          </div>
+        ) : loading ? (
+          <div className="p-8 text-center text-slate-500 text-sm">
+            <i className="fa-solid fa-spinner fa-spin mr-2" /> Chargement des véhicules...
+          </div>
+        ) : vehicules.length === 0 ? (
+          <div className="p-8 text-center text-slate-400 text-sm flex items-center justify-center gap-2">
+            <i className="fa-solid fa-circle-exclamation" /> Aucun véhicule enregistré pour le moment.
           </div>
         ) : (
           <div className="overflow-x-auto">

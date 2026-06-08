@@ -188,7 +188,9 @@ export default function ClientReservation() {
           {/* STEP 3 */}
           {step === 3 && (
             <div className="flex flex-col gap-5">
-              <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">📋 Récapitulatif</h3>
+              <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                <i className="fa-solid fa-list-check text-blue-600" /> Récapitulatif
+              </h3>
               <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-col gap-2.5 text-sm">
                 <div className="flex justify-between border-b border-slate-200/50 pb-2">
                   <span className="text-slate-400">Véhicule:</span>
@@ -217,7 +219,10 @@ export default function ClientReservation() {
       {/* CARD 2: HISTORIQUE DES RESERVATIONS DU CLIENT */}
       <div className="bg-white w-full max-w-2xl rounded-2xl border border-slate-200 shadow-sm overflow-hidden mb-8">
         <div className="p-5 border-b border-slate-100 bg-slate-50/50">
-          <h2 className="text-lg font-bold text-slate-800">📋 Mes Réservations & Suivi</h2>
+          <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+          <i className="fa-solid fa-list-check text-blue-600" />
+          Mes Réservations & Suivi
+        </h2>
         </div>
 
         <div className="divide-y divide-slate-100">
@@ -228,8 +233,8 @@ export default function ClientReservation() {
                   <span className="font-bold text-sm text-slate-800">{res.service}</span>
                   <span className="text-xs text-slate-400 font-medium">• {res.vehicule}</span>
                 </div>
-                <p className="text-xs text-slate-500">
-                  📅 {res.date} à <span className="font-semibold text-slate-700">{res.heure}</span>
+                <p className="text-xs text-slate-500 flex items-center gap-2">
+                  <i className="fa-solid fa-calendar-days" /> {res.date} à <span className="font-semibold text-slate-700">{res.heure}</span>
                 </p>
               </div>
 

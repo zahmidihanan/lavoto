@@ -4,21 +4,21 @@ export default function MainLayout({ children, currentRole = "admin", setCurrent
   const [isOpen, setIsOpen] = useState(false);
 
   const menuAdmin = [
-    { name: "📈 Dashboard", id: "dashboard" },
-    { name: "📅 Réservations", id: "reservations" },
-    { name: "🚗 Véhicules & Services", id: "services" },
-    { name: "🧾 Factures & Caisses", id: "factures" },
-    { name: "👥 Utilisateurs", id: "users" },
-    { name: "⭐ Avis Clients", id: "avis" },
-    { name: "🔔 Notifications", id: "notifications" },
+    { name: "Dashboard", id: "dashboard", icon: "fa-chart-line" },
+    { name: "Réservations", id: "reservations", icon: "fa-calendar-days" },
+    { name: "Véhicules & Services", id: "services", icon: "fa-car" },
+    { name: "Factures & Caisses", id: "factures", icon: "fa-file-invoice-dollar" },
+    { name: "Utilisateurs", id: "users", icon: "fa-users" },
+    { name: "Avis Clients", id: "avis", icon: "fa-star" },
+    { name: "Notifications", id: "notifications", icon: "fa-bell" },
   ];
 
   const menuClient = [
-    { name: "✨ Réserver un lavage", id: "client-booking" }
+    { name: "Réserver un lavage", id: "client-booking", icon: "fa-handshake-simple" }
   ];
 
   const menuEmploye = [
-    { name: "💼 Mes tâches de lavage", id: "employe-tasks" }
+    { name: "Mes tâches de lavage", id: "employe-tasks", icon: "fa-briefcase" }
   ];
 
   const getMenu = () => {
@@ -43,7 +43,9 @@ export default function MainLayout({ children, currentRole = "admin", setCurrent
                 <span className="text-[10px] uppercase font-bold tracking-widest text-blue-400 block -mt-1">Management</span>
               </div>
             </div>
-            <button className="md:hidden text-blue-300 text-xl" onClick={() => setIsOpen(false)}>✕</button>
+            <button className="md:hidden text-blue-300 text-xl" onClick={() => setIsOpen(false)}>
+              <i className="fa-solid fa-xmark" />
+            </button>
           </div>
 
           {/* MENU */}
@@ -64,7 +66,8 @@ export default function MainLayout({ children, currentRole = "admin", setCurrent
                     : "text-blue-200/80 hover:bg-blue-900/50 hover:text-white"
                 }`}
               >
-                {item.name}
+                <i className={`fa-solid ${item.icon} w-4`} />
+                <span>{item.name}</span>
               </button>
             ))}
           </nav>
@@ -88,7 +91,7 @@ export default function MainLayout({ children, currentRole = "admin", setCurrent
             className="text-blue-300 hover:text-rose-400 p-2 hover:bg-blue-900/40 rounded-xl transition text-base" 
             title="Se déconnecter"
           >
-            🚪
+            <i className="fa-solid fa-right-from-bracket" />
           </button>
         </div>
 
@@ -98,7 +101,9 @@ export default function MainLayout({ children, currentRole = "admin", setCurrent
       <div className="flex-1 md:pl-64 flex flex-col min-h-screen">
         <header className="md:hidden h-16 bg-white border-b border-slate-200 px-4 flex items-center justify-between sticky top-0 z-10">
           <span className="font-black text-sm text-blue-950">Lavoto</span>
-          <button onClick={() => setIsOpen(true)} className="p-2 text-slate-600 bg-slate-100 rounded-xl">☰</button>
+          <button onClick={() => setIsOpen(true)} className="p-2 text-slate-600 bg-slate-100 rounded-xl">
+            <i className="fa-solid fa-bars" />
+          </button>
         </header>
 
         <main className="flex-1 w-full flex flex-col">

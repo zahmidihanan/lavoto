@@ -31,7 +31,8 @@ export default function Users() {
       {/* Header - Zraq w Byad */}
       <div className="mb-8 border-b border-slate-200 pb-5">
         <h1 className="text-3xl font-extrabold text-blue-900 tracking-tight flex items-center gap-3">
-          👥 Utilisateurs & Autorisations
+          <i className="fa-solid fa-users text-blue-600" />
+          Utilisateurs & Autorisations
         </h1>
         <p className="text-sm text-slate-500 mt-1">
           Gérez les comptes utilisateurs, affectez les rôles d'accès et contrôlez les privilèges du système.
@@ -41,7 +42,8 @@ export default function Users() {
       {/* FORMULAIRE (Style Clean & Organized) */}
       <div className="bg-white p-6 rounded-2xl border border-blue-100 shadow-sm mb-8 max-w-4xl">
         <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-          ➕ Ajouter un nouvel utilisateur
+          <i className="fa-solid fa-user-plus text-blue-600" />
+          Ajouter un nouvel utilisateur
         </h2>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
@@ -78,9 +80,9 @@ export default function Users() {
               value={form.role}
               onChange={(e) => setForm({ ...form, role: e.target.value })}
             >
-              <option value="admin">🔑 Administrateur</option>
-              <option value="employe">💼 Employé</option>
-              <option value="client">👤 Client</option>
+              <option value="admin">Administrateur</option>
+              <option value="employe">Employé</option>
+              <option value="client">Client</option>
             </select>
           </div>
 
@@ -101,12 +103,15 @@ export default function Users() {
       {/* TABLEAU DES UTILISATEURS */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="p-5 border-b border-slate-100 bg-slate-50/50">
-          <h2 className="text-lg font-bold text-slate-800">📋 Comptes enregistrés</h2>
+          <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+            <i className="fa-solid fa-list-check text-blue-600" />
+            Comptes enregistrés
+          </h2>
         </div>
 
         {users.length === 0 ? (
           <div className="p-8 text-center text-slate-400 text-sm">
-            ❌ Aucun utilisateur dans la base de données.
+            <i className="fa-solid fa-circle-exclamation mr-2" /> Aucun utilisateur dans la base de données.
           </div>
         ) : (
           <div className="overflow-x-auto">

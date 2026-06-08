@@ -30,7 +30,8 @@ export default function Avis() {
       {/* Header - Zraq w Byad */}
       <div className="mb-8 border-b border-slate-200 pb-5">
         <h1 className="text-3xl font-extrabold text-blue-900 tracking-tight flex items-center gap-3">
-          ⭐ Avis & Retours Clients
+          <i className="fa-solid fa-star text-blue-600" />
+          Avis & Retours Clients
         </h1>
         <p className="text-sm text-slate-500 mt-1">
           Consultez les évaluations des clients, gérez la satisfaction et suivez la qualité des prestations.
@@ -40,7 +41,8 @@ export default function Avis() {
       {/* FORMULAIRE (Style Clean & Organized) */}
       <div className="bg-white p-6 rounded-2xl border border-blue-100 shadow-sm mb-8 max-w-4xl">
         <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-          ➕ Ajouter un avis manuellement
+          <i className="fa-solid fa-plus text-blue-600" />
+          Ajouter un avis manuellement
         </h2>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
@@ -65,11 +67,11 @@ export default function Avis() {
               value={form.note}
               onChange={(e) => setForm({ ...form, note: e.target.value })}
             >
-              <option value={5}>⭐⭐⭐⭐⭐ (5/5)</option>
-              <option value={4}>⭐⭐⭐⭐ (4/5)</option>
-              <option value={3}>⭐⭐⭐ (3/5)</option>
-              <option value={2}>⭐⭐ (2/5)</option>
-              <option value={1}>⭐ (1/5)</option>
+              <option value={5}>5 étoiles</option>
+              <option value={4}>4 étoiles</option>
+              <option value={3}>3 étoiles</option>
+              <option value={2}>2 étoiles</option>
+              <option value={1}>1 étoile</option>
             </select>
           </div>
 
@@ -101,11 +103,14 @@ export default function Avis() {
 
       {/* SECTION DES CARTES D'AVIS */}
       <div className="max-w-6xl">
-        <h2 className="text-lg font-bold text-slate-800 mb-4">📋 Retours publiés ({avis.length})</h2>
+<h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <i className="fa-solid fa-list-check text-blue-600" />
+            Retours publiés ({avis.length})
+          </h2>
         
         {avis.length === 0 ? (
           <div className="bg-white p-8 text-center text-slate-400 text-sm rounded-2xl border border-slate-200">
-            ❌ Aucun avis enregistré pour le moment.
+            <i className="fa-solid fa-circle-exclamation mr-2" /> Aucun avis enregistré pour le moment.
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -123,8 +128,13 @@ export default function Avis() {
                       </div>
                       {a.client}
                     </span>
-                    <span className="text-amber-500 text-xs bg-amber-50 px-2 py-1 rounded-lg border border-amber-100 font-bold">
-                      {"★".repeat(a.note)}{"☆".repeat(5 - a.note)}
+                    <span className="text-amber-500 text-xs bg-amber-50 px-2 py-1 rounded-lg border border-amber-100 font-bold flex items-center gap-1">
+                      {Array.from({ length: a.note }).map((_, index) => (
+                        <i key={`filled-${index}`} className="fa-solid fa-star" />
+                      ))}
+                      {Array.from({ length: 5 - a.note }).map((_, index) => (
+                        <i key={`empty-${index}`} className="fa-regular fa-star" />
+                      ))}
                     </span>
                   </div>
                   

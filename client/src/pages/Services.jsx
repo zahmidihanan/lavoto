@@ -43,7 +43,8 @@ export default function Services() {
       {/* Header - Zraq w Byad */}
       <div className="mb-8 border-b border-slate-200 pb-5">
         <h1 className="text-3xl font-extrabold text-blue-900 tracking-tight flex items-center gap-3">
-          🛠️ Catalogue des Services
+          <i className="fa-solid fa-wrench text-blue-600" />
+          Catalogue des Services
         </h1>
         <p className="text-sm text-slate-500 mt-1">
           Configurez les types de lavage, les descriptions et les tarifs de base pour le système commercial Lavoto
@@ -53,7 +54,8 @@ export default function Services() {
       {/* FORMULAIRE D'AJOUT (Style Clean w Pro) */}
       <div className="bg-white p-6 rounded-2xl border border-blue-100 shadow-sm mb-8 max-w-4xl">
         <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-          ➕ Ajouter un nouveau service
+          <i className="fa-solid fa-plus text-blue-600" />
+          Ajouter un nouveau service
         </h2>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
@@ -124,12 +126,15 @@ export default function Services() {
       {/* TABLEAU DES SERVICES */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="p-5 border-b border-slate-100 bg-slate-50/50">
-          <h2 className="text-lg font-bold text-slate-800">📋 Liste des prestations disponibles</h2>
+          <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+            <i className="fa-solid fa-list-check text-blue-600" />
+            Liste des prestations disponibles
+          </h2>
         </div>
 
         {services.length === 0 ? (
           <div className="p-8 text-center text-slate-400 text-sm">
-            ❌ Aucun service configuré.
+            <i className="fa-solid fa-circle-exclamation mr-2" /> Aucun service configuré.
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -147,7 +152,8 @@ export default function Services() {
                 {services.map((s) => (
                   <tr key={s.id} className="hover:bg-slate-50/80 transition">
                     <td className="py-4 px-6 font-bold text-slate-800 flex items-center gap-2">
-                      <span>🧼</span> {s.nom_service}
+                      <i className="fa-solid fa-bath" />
+                      {s.nom_service}
                     </td>
                     <td className="py-4 px-6 text-slate-500 max-w-xs md:max-w-md break-words">{s.description || "Aucune description"}</td>
                     <td className="py-4 px-6 font-black text-blue-700 text-base">{s.prix_base} DH</td>
