@@ -19,10 +19,11 @@ class VehiculeController extends Controller
     public function index(Request $request): JsonResponse
     {
         $query = Vehicule::with(['user', 'typeVehicule']);
+        $user = $request->user();
 
         // Filtre par utilisateur (client voit que ses véhicules)
-        if ($request->user()->isClient && !$request->user()->isAdmin) {
-            $query->where('user_id', $request->user()->id);
+        if ($user?->isClient && !$user->isAdmin) {
+            $query->where('user_id', $user->id);
         } elseif ($request->has('user_id')) {
             $query->where('user_id', $request->user_id);
         }
@@ -54,11 +55,13 @@ class VehiculeController extends Controller
      */
     public function store(StoreVehiculeRequest $request): JsonResponse
     {
+        $user = $request->user();
+
         $vehicule = Vehicule::create([
             ...$request->validated(),
-            'user_id' => $request->user()->isClient
-                ? $request->user()->id
-                : ($request->user_id ?? $request->user()->id),
+            'user_id' => $user?->isClient
+                ? $user->id
+                : ($request->user_id ?? $user?->id),
         ]);
 
         return response()->json([
