@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Payment\StorePaymentRequest;
 use App\Http\Resources\PaymentResource;
+use App\Models\Booking;
 use App\Models\Payment;
 use App\Services\PaymentService;
 use App\Traits\ApiResponse;
@@ -34,7 +35,8 @@ class PaymentController extends Controller
     public function store(StorePaymentRequest $request): JsonResponse
     {
         $this->authorize('create', Payment::class);
-        $payment = $this->paymentService->createForBooking($request->validated());
+        $booking = Booking::findOrFail($request->validated('booking_id'));
+        $payment = $this->paymentService->createForBooking($booking, $request->validated());
         return $this->created(new PaymentResource($payment->load('booking')));
     }
 

@@ -13,7 +13,7 @@ class CustomerRepository extends BaseRepository implements CustomerRepositoryInt
     public function paginate(array $filters): LengthAwarePaginator
     {
         $query = Customer::query()->with(['user', 'company']);
-        return $this->paginate($this->applyFilters($query, $filters), $filters);
+        return $this->paginateQuery($this->applyFilters($query, $filters), $filters);
     }
 
     public function findById(int $id, array $relations = []): ?Customer

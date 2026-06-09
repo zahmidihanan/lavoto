@@ -21,7 +21,7 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
             $query->where('status', $filters['status']);
         }
 
-        return $this->paginate($this->applyFilters($query, $filters), $filters);
+        return $this->paginateQuery($this->applyFilters($query, $filters), $filters);
     }
 
     public function findById(int $id, array $relations = []): ?User

@@ -10,7 +10,7 @@ return new class extends Migration {
         Schema::create('quality_checks', function (Blueprint $table) {
             $table->id();
             $table->foreignId('booking_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('employee_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('employee_id')->nullable()->constrained()->nullOnDelete();
             $table->text('notes')->nullable();
             $table->boolean('passed')->default(false);
             $table->unsignedTinyInteger('rating')->nullable()->comment('1-5');

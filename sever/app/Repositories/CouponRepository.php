@@ -18,10 +18,13 @@ class CouponRepository extends BaseRepository implements CouponRepositoryInterfa
             $query->where('is_active', (bool) $filters['is_active']);
         }
 
-        return $this->paginate($this->applyFilters($query, $filters), $filters);
+        return $this->paginateQuery($this->applyFilters($query, $filters), $filters);
     }
 
-    public function findById(int $id): ?Coupon { return Coupon::find($id); }
+    public function findById(int $id, array $relations = []): ?Coupon
+    {
+        return Coupon::with($relations)->find($id);
+    }
 
     public function findByCode(string $code): ?Coupon
     {

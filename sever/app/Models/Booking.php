@@ -49,6 +49,7 @@ class Booking extends Model
 
     public function payment(): HasOne         { return $this->hasOne(Payment::class); }
     public function qualityCheck(): HasOne    { return $this->hasOne(QualityCheck::class); }
+    public function photos(): HasMany         { return $this->hasMany(VehiclePhoto::class); }
     public function vehiclePhotos(): HasMany  { return $this->hasMany(VehiclePhoto::class); }
 
     public function scopeForCustomer($query, int $customerId)

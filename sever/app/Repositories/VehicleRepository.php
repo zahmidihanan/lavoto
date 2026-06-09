@@ -19,7 +19,7 @@ class VehicleRepository extends BaseRepository implements VehicleRepositoryInter
             $query->where('customer_id', $filters['customer_id']);
         }
 
-        return $this->paginate($this->applyFilters($query, $filters), $filters);
+        return $this->paginateQuery($this->applyFilters($query, $filters), $filters);
     }
 
     public function findById(int $id, array $relations = []): ?Vehicle

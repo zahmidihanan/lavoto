@@ -31,10 +31,15 @@ class BookingService
         return $booking;
     }
 
-    public function create(array $data): Booking
+    public function create(array $data, \App\Models\User $authUser): Booking
     {
         $service = $this->serviceRepo->findById($data['service_id']);
         if (! $service) throw new ApiException('Service not found.', 404);
+
+        // Derive customer_id from vehicle (or from auth user if they are a customer)
+        $vehicle = \App\Models\Vehicle::findOrFail($data['vehicle_id']);
+        $data['customer_id'] = $vehicle->customer_id;
+        $data['company_id']  = $authUser->company_id;
 
         $totalAmount    = (float) $service->price;
         $discountAmount = 0.0;
@@ -59,13 +64,16 @@ class BookingService
             'status'          => 'pending',
         ]));
 
-        $this->notificationService->send(
-            $booking->customer->user_id,
-            'Booking Confirmed',
-            "Your booking #{$booking->id} has been received.",
-            'booking_created',
-            ['booking_id' => $booking->id]
-        );
+        $booking->load('customer');
+        if ($booking->customer) {
+            $this->notificationService->send(
+                $booking->customer->user_id,
+                'Booking Confirmed',
+                "Your booking #{$booking->id} has been received.",
+                'booking_created',
+                ['booking_id' => $booking->id]
+            );
+        }
 
         return $booking;
     }

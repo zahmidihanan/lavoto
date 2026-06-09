@@ -19,7 +19,7 @@ class ServiceRepository extends BaseRepository implements ServiceRepositoryInter
             $query->where('is_active', (bool) $filters['is_active']);
         }
 
-        return $this->paginate($this->applyFilters($query, $filters), $filters);
+        return $this->paginateQuery($this->applyFilters($query, $filters), $filters);
     }
 
     public function findById(int $id, array $relations = []): ?Service

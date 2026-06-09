@@ -19,7 +19,7 @@ class EmployeeRepository extends BaseRepository implements EmployeeRepositoryInt
             $query->where('station_id', $filters['station_id']);
         }
 
-        return $this->paginate($this->applyFilters($query, $filters), $filters);
+        return $this->paginateQuery($this->applyFilters($query, $filters), $filters);
     }
 
     public function findById(int $id, array $relations = []): ?Employee

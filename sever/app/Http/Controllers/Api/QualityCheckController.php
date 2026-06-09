@@ -7,6 +7,7 @@ use App\Http\Requests\QualityCheck\StoreQualityCheckRequest;
 use App\Http\Resources\QualityCheckResource;
 use App\Models\Booking;
 use App\Models\QualityCheck;
+use App\Services\BookingService;
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
 
@@ -14,20 +15,25 @@ class QualityCheckController extends Controller
 {
     use ApiResponse;
 
+    public function __construct(private readonly BookingService $bookingService) {}
+
     public function store(StoreQualityCheckRequest $request): JsonResponse
     {
         $booking = Booking::findOrFail($request->validated('booking_id'));
 
+        /** @var \App\Models\User $authUser */
+        $authUser = \Illuminate\Support\Facades\Auth::user();
+
         $check = QualityCheck::create([
             'booking_id'  => $booking->id,
-            'employee_id' => auth()->user()->employee?->id,
+            'employee_id' => $authUser->employee?->id,
             'notes'       => $request->validated('notes'),
             'passed'      => $request->validated('passed'),
             'rating'      => $request->validated('rating'),
         ]);
 
         if ($check->passed) {
-            $booking->update(['status' => 'completed']);
+            $this->bookingService->updateStatus($booking, 'completed');
         }
 
         return $this->created(new QualityCheckResource($check->load('employee.user')));

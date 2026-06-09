@@ -32,7 +32,7 @@ class BookingRepository extends BaseRepository implements BookingRepositoryInter
             $query->whereDate('booking_date', '<=', $filters['date_to']);
         }
 
-        return $this->paginate($this->applyFilters($query, $filters), $filters);
+        return $this->paginateQuery($this->applyFilters($query, $filters), $filters);
     }
 
     public function findById(int $id, array $relations = []): ?Booking

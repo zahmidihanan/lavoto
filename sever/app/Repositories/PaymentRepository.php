@@ -21,12 +21,12 @@ class PaymentRepository extends BaseRepository implements PaymentRepositoryInter
             $query->where('payment_method', $filters['payment_method']);
         }
 
-        return $this->paginate($this->applyFilters($query, $filters), $filters);
+        return $this->paginateQuery($this->applyFilters($query, $filters), $filters);
     }
 
-    public function findById(int $id): ?Payment
+    public function findById(int $id, array $relations = []): ?Payment
     {
-        return Payment::with('booking')->find($id);
+        return Payment::with($relations ?: ['booking'])->find($id);
     }
 
     public function findByBooking(int $bookingId): ?Payment

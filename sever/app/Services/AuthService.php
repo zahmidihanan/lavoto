@@ -11,8 +11,6 @@ use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
-use Laravel\Sanctum\NewAccessToken;
-
 class AuthService
 {
     public function __construct(
@@ -71,13 +69,17 @@ class AuthService
 
     public function logout(User $user): void
     {
-        $user->currentAccessToken()->delete();
+        /** @var \Laravel\Sanctum\PersonalAccessToken $token */
+        $token = $user->currentAccessToken();
+        $token->delete();
     }
 
-    public function refresh(User $user): string
+    public function refresh(User $user): array
     {
-        $user->currentAccessToken()->delete();
-        return $user->createToken('lavoto_auth')->plainTextToken;
+        /** @var \Laravel\Sanctum\PersonalAccessToken $token */
+        $token = $user->currentAccessToken();
+        $token->delete();
+        return ['token' => $user->createToken('lavoto_auth')->plainTextToken];
     }
 
     public function forgotPassword(string $email): string

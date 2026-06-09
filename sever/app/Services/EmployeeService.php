@@ -76,8 +76,8 @@ class EmployeeService
         $employee->user->delete();
     }
 
-    public function availableForStation(int $stationId): Collection
+    public function availableForStation(?int $stationId = null): Collection
     {
-        return $this->employeeRepo->availableForStation($stationId);
+        return $this->employeeRepo->availableForStation($stationId ?? 0);
     }
 }
