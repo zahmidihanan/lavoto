@@ -37,7 +37,17 @@ class VehicleController extends Controller
         $this->authorize('create', Vehicle::class);
         /** @var \App\Models\User $authUser */
         $authUser = request()->user();
-        $data = array_merge($request->validated(), ['company_id' => $authUser->company_id]);
+
+        $data = $request->validated();
+        $data['company_id'] = $authUser->company_id;
+
+        // Auto-resolve customer_id for customer role
+        if (empty($data['customer_id'])) {
+            $customer = $authUser->customer;
+            abort_unless($customer, 422, 'No customer profile linked to this account.');
+            $data['customer_id'] = $customer->id;
+        }
+
         $vehicle = $this->vehicleService->create($data);
         return $this->created(new VehicleResource($vehicle));
     }

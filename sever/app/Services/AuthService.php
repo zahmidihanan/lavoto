@@ -40,9 +40,10 @@ class AuthService
 
         event(new Registered($user));
 
+        $user->load('company');
         return [
             'token' => $user->createToken('lavoto_auth')->plainTextToken,
-            'user'  => $user->load('company'),
+            'user'  => $this->serializeUser($user),
         ];
     }
 
@@ -61,10 +62,22 @@ class AuthService
         $user->update(['last_login_at' => now()]);
         setPermissionsTeamId($user->company_id ?? 0);
 
+        $user->load('company', 'station');
         return [
             'token' => $user->createToken('lavoto_auth')->plainTextToken,
-            'user'  => $user->load('company', 'station'),
+            'user'  => $this->serializeUser($user),
         ];
+    }
+
+    private function serializeUser(User $user): array
+    {
+        $user->loadMissing(['customer', 'employee']);
+        return array_merge($user->toArray(), [
+            'roles'       => $user->getRoleNames()->toArray(),
+            'permissions' => $user->getAllPermissions()->pluck('name')->toArray(),
+            'customer_id' => $user->customer?->id,
+            'employee_id' => $user->employee?->id,
+        ]);
     }
 
     public function logout(User $user): void

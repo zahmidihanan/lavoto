@@ -39,7 +39,7 @@ class AuthController extends Controller
 
     public function me(Request $request): JsonResponse
     {
-        $user = $request->user()->load(['company', 'station']);
+        $user = $request->user()->load(['company', 'station', 'customer', 'employee']);
         return $this->success([
             'id'                => $user->id,
             'name'              => $user->name,
@@ -48,6 +48,8 @@ class AuthController extends Controller
             'status'            => $user->status,
             'company_id'        => $user->company_id,
             'station_id'        => $user->station_id,
+            'customer_id'       => $user->customer?->id,
+            'employee_id'       => $user->employee?->id,
             'email_verified_at' => $user->email_verified_at,
             'last_login_at'     => $user->last_login_at,
             'is_super_admin'    => $user->isSuperAdmin(),

@@ -11,7 +11,7 @@ class StoreVehicleRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'customer_id'  => 'required|exists:customers,id',
+            'customer_id'  => 'nullable|exists:customers,id',
             'brand'        => 'required|string|max:100',
             'model'        => 'required|string|max:100',
             'year'         => 'nullable|integer|between:1900,2100',
