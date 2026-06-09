@@ -2,53 +2,30 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Traits\BelongsToCompany;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 class Service extends Model
 {
-    use HasFactory;
+    use SoftDeletes, BelongsToCompany, LogsActivity;
 
     protected $fillable = [
-        'nom',
-        'categorie',
-        'description',
-        'duree_estimee',
-        'prix_base',
-        'statut',
+        'company_id', 'name', 'description',
+        'price', 'duration_minutes', 'is_active',
     ];
 
-    protected $casts = [
-        'duree_estimee' => 'datetime:H:i',
-        'prix_base' => 'decimal:2',
-    ];
+    protected $casts = ['price' => 'decimal:2', 'is_active' => 'boolean'];
 
-    // ===== RELATIONS =====
-    public function reservations(): HasMany
+    public function getActivitylogOptions(): LogOptions
     {
-        return $this->hasMany(Reservation::class);
+        return LogOptions::defaults()->logFillable()->logOnlyDirty();
     }
 
-    // ===== SCOPES =====
-    public function scopeDisponibles($query)
-    {
-        return $query->where('statut', 'disponible');
-    }
-
-    public function scopeByCategorie($query, string $categorie)
-    {
-        return $query->where('categorie', $categorie);
-    }
-
-    public function scopeSearch($query, string $term)
-    {
-        return $query->where('nom', 'LIKE', "%{$term}%");
-    }
-
-    // ===== MÉTHODES =====
-    public static function getCategories(): array
-    {
-        return ['lavage', 'nettoyage', 'polissage', 'entretien'];
-    }
+    public function company(): BelongsTo { return $this->belongsTo(Company::class); }
+    public function bookings(): HasMany  { return $this->hasMany(Booking::class); }
 }

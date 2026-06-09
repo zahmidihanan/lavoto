@@ -2,66 +2,26 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Notification extends Model
 {
-    use HasFactory;
+    protected $fillable = ['user_id', 'title', 'body', 'type', 'data', 'read_at'];
 
-    public $timestamps = false;
+    protected $casts = ['data' => 'array', 'read_at' => 'datetime'];
 
-    protected $fillable = [
-        'user_id',
-        'type',
-        'titre',
-        'message',
-        'canal',
-        'lu',
-    ];
+    public function user(): BelongsTo { return $this->belongsTo(User::class); }
 
-    protected $casts = [
-        'lu' => 'boolean',
-        'created_at' => 'datetime',
-    ];
-
-    // ===== RELATIONS =====
-    public function user(): BelongsTo
+    public function markAsRead(): void
     {
-        return $this->belongsTo(User::class);
+        if ($this->read_at === null) {
+            $this->update(['read_at' => now()]);
+        }
     }
 
-    // ===== SCOPES =====
-    public function scopeNonLues($query)
+    public function scopeUnread($query)
     {
-        return $query->where('lu', false);
-    }
-
-    public function scopeLues($query)
-    {
-        return $query->where('lu', true);
-    }
-
-    public function scopeByType($query, string $type)
-    {
-        return $query->where('type', $type);
-    }
-
-    // ===== MÉTHODES =====
-    public function marquerCommeLue(): void
-    {
-        $this->update(['lu' => true]);
-    }
-
-    public static function creerPourUser(int $userId, string $type, string $titre, string $message, string $canal = 'app'): self
-    {
-        return self::create([
-            'user_id' => $userId,
-            'type' => $type,
-            'titre' => $titre,
-            'message' => $message,
-            'canal' => $canal,
-        ]);
+        return $query->whereNull('read_at');
     }
 }

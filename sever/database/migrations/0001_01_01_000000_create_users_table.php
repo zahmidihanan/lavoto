@@ -5,31 +5,30 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
-    public function up(): void {
+    public function up(): void
+    {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('nom', 100);
-            $table->string('prenom', 100);
+            $table->string('name', 150);
             $table->string('email', 255)->unique();
-            $table->string('password', 255);
-            $table->string('telephone', 20)->nullable();
-            $table->foreignId('role_id')->constrained('roles')->onDelete('cascade');
-            $table->enum('statut', ['actif', 'inactif', 'conges'])->default('actif');
+            $table->string('phone', 30)->nullable();
+            $table->string('password');
+            $table->unsignedBigInteger('company_id')->nullable();
+            $table->unsignedBigInteger('station_id')->nullable();
+            $table->enum('status', ['active', 'inactive', 'suspended'])->default('active');
             $table->timestamp('email_verified_at')->nullable();
+            $table->rememberToken();
             $table->timestamp('last_login_at')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
-    
 
-        // 3. Table Password Reset Tokens
         Schema::create('password_reset_tokens', function (Blueprint $table) {
             $table->string('email')->primary();
             $table->string('token');
             $table->timestamp('created_at')->nullable();
         });
 
-        // 4. Table Sessions
         Schema::create('sessions', function (Blueprint $table) {
             $table->string('id')->primary();
             $table->foreignId('user_id')->nullable()->index();
@@ -38,17 +37,12 @@ return new class extends Migration {
             $table->longText('payload');
             $table->integer('last_activity')->index();
         });
-    } // Fin de la méthode up()
+    }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        // On supprime d'abord les tables qui dépendent des autres (clés étrangères)
         Schema::dropIfExists('sessions');
         Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('users');
-        
     }
 };

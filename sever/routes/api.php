@@ -1,124 +1,94 @@
 <?php
 
-use App\Http\Controllers\Api\AbonnementController;
-use App\Http\Controllers\Api\AvisController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\BookingController;
+use App\Http\Controllers\Api\CouponController;
+use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\DashboardController;
-use App\Http\Controllers\Api\FactureController;
+use App\Http\Controllers\Api\EmployeeController;
+use App\Http\Controllers\Api\LoyaltyController;
 use App\Http\Controllers\Api\NotificationController;
-use App\Http\Controllers\Api\PaiementController;
-use App\Http\Controllers\Api\ReservationController;
+use App\Http\Controllers\Api\PaymentController;
+use App\Http\Controllers\Api\QualityCheckController;
 use App\Http\Controllers\Api\ServiceController;
+use App\Http\Controllers\Api\StationController;
 use App\Http\Controllers\Api\UserController;
-use App\Http\Controllers\Api\VehiculeController;
+use App\Http\Controllers\Api\VehicleController;
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| API ROUTES - LAVOTO (Rôles : admin, employe, client)
-|--------------------------------------------------------------------------
-*/
-
-// ===================================================================
-// ROUTES PUBLIQUES
-// ===================================================================
+// ── Public ─────────────────────────────────────────────────────────────────
 Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
-    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/login',    [AuthController::class, 'login']);
+    Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
+    Route::post('/reset-password',  [AuthController::class, 'resetPassword']);
+    Route::get('/verify-email/{id}/{hash}', [AuthController::class, 'verifyEmail'])
+        ->name('verification.verify');
 });
 
-// ===================================================================
-// ROUTES AUTHENTIFIÉES
-// ===================================================================
+// Public services list
+Route::get('/services/active', [ServiceController::class, 'active']);
+
+// ── Authenticated (Sanctum token) ──────────────────────────────────────────
 Route::middleware('auth:sanctum')->group(function () {
 
-    // ------ AUTHENTIFICATION ------
+    // Auth
     Route::prefix('auth')->group(function () {
-        Route::post('/logout', [AuthController::class, 'logout']);
-        Route::post('/logout-all', [AuthController::class, 'logoutAll']);
-        Route::get('/me', [AuthController::class, 'me']);
-        Route::put('/profile', [AuthController::class, 'updateProfile']);
-        Route::put('/password', [AuthController::class, 'changePassword']);
+        Route::post('/logout',                [AuthController::class, 'logout']);
+        Route::get('/me',                     [AuthController::class, 'me']);
+        Route::post('/refresh',               [AuthController::class, 'refresh']);
+        Route::post('/profile',               [AuthController::class, 'updateProfile']);
+        Route::post('/email/resend',          [AuthController::class, 'resendVerification']);
     });
 
-    // ------ DASHBOARDS (Sécurisés par Rôles respectifs) ------
-    Route::get('/dashboard/client', [DashboardController::class, 'client'])->middleware('role:client');
-    Route::get('/dashboard/employe', [DashboardController::class, 'employe'])->middleware('role:employe');
-    Route::get('/dashboard/admin', [DashboardController::class, 'admin'])->middleware('role:admin');
+    // Dashboard
+    Route::get('/dashboard', [DashboardController::class, 'index']);
 
-    // ------ NOTIFICATIONS ------
-    Route::get('/notifications', [NotificationController::class, 'index']);
-    Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount']);
-    Route::put('/notifications/{notification}/read', [NotificationController::class, 'markAsRead']);
-    Route::put('/notifications/read-all', [NotificationController::class, 'markAllAsRead']);
-    Route::delete('/notifications/{notification}', [NotificationController::class, 'destroy']);
+    // Users
+    Route::apiResource('users', UserController::class);
 
-    // ------ VÉHICULES ------
-    Route::get('/vehicules/types', [VehiculeController::class, 'types']); 
-    Route::apiResource('vehicules', VehiculeController::class);
+    // Stations
+    Route::apiResource('stations', StationController::class);
 
-    // ------ SERVICES ------
-    Route::get('/services', [ServiceController::class, 'index']);
-    Route::get('/services/categories', [ServiceController::class, 'categories']);
-    Route::get('/services/{service}', [ServiceController::class, 'show']);
-    
-    // Actions administratives sur les services
-    Route::middleware('role:admin')->group(function () {
-        Route::post('/services', [ServiceController::class, 'store']);
-        Route::put('/services/{service}', [ServiceController::class, 'update']);
-        Route::delete('/services/{service}', [ServiceController::class, 'destroy']);
-    });
+    // Services
+    Route::apiResource('services', ServiceController::class);
 
-    // ------ RÉSERVATIONS ------
-    Route::apiResource('reservations', ReservationController::class)->only(['index', 'store', 'show']);
-    Route::put('/reservations/{reservation}/annuler', [ReservationController::class, 'annuler']); 
-    
-    // Actions réservées au personnel
-    Route::middleware('role:admin,employe')->group(function () {
-        Route::put('/reservations/{reservation}/statut', [ReservationController::class, 'updateStatut']);
-        Route::get('/reservations-today', [ReservationController::class, 'today']);
-    });
+    // Customers
+    Route::apiResource('customers', CustomerController::class)->except(['store']);
 
-    // ------ FACTURES & PAIEMENTS ------
-    // Note : L'indexation globale ou l'accès aux factures/paiements doit être filtré par ID utilisateur dans le contrôleur pour les clients !
-    Route::get('/factures', [FactureController::class, 'index']);
-    Route::get('/factures/{facture}', [FactureController::class, 'show']);
-    Route::get('/paiements', [PaiementController::class, 'index']);
-    Route::post('/paiements', [PaiementController::class, 'store']); 
+    // Vehicles
+    Route::apiResource('vehicles', VehicleController::class);
 
-    // ------ AVIS ------
-    Route::get('/avis', [AvisController::class, 'index']);
-    Route::post('/avis', [AvisController::class, 'store']);
-    
-    // Modération des avis
-    Route::middleware('role:admin')->group(function () {
-        Route::put('/avis/{avis}/statut', [AvisController::class, 'updateStatut']);
-        Route::get('/avis-pending', [AvisController::class, 'pending']);
-    });
+    // Employees
+    Route::get('/employees/available', [EmployeeController::class, 'available']);
+    Route::apiResource('employees', EmployeeController::class);
 
-    // ------ ABONNEMENTS ------
-    Route::get('/abonnements-types', [AbonnementController::class, 'types']); 
-    Route::get('/abonnements', [AbonnementController::class, 'index']);
-    Route::post('/abonnements', [AbonnementController::class, 'store']);
-    Route::put('/abonnements/{abonnement}/cancel', [AbonnementController::class, 'cancel']); // Changé en PUT (Standard REST pour modification d'état)
+    // Bookings
+    Route::post('/bookings/{booking}/status',           [BookingController::class, 'updateStatus']);
+    Route::post('/bookings/{booking}/assign-employees', [BookingController::class, 'assignEmployees']);
+    Route::post('/bookings/{booking}/cancel',           [BookingController::class, 'cancel']);
+    Route::apiResource('bookings', BookingController::class)->except(['update', 'destroy']);
 
-    // ------ UTILISATEURS & EMPLOYÉS (Espace Admin) ------
-    Route::middleware('role:admin')->group(function () {
-        Route::get('/users', [UserController::class, 'index']);
-        Route::get('/users/available-employees', [UserController::class, 'availableEmployees']); 
-        Route::get('/users/{user}', [UserController::class, 'show']);
-        Route::put('/users/{user}', [UserController::class, 'update']);
-        Route::delete('/users/{user}', [UserController::class, 'destroy']);
-    });
+    // Payments
+    Route::post('/payments/{payment}/refund', [PaymentController::class, 'refund']);
+    Route::apiResource('payments', PaymentController::class)->except(['update', 'destroy']);
 
-    // ------ STATISTIQUES GLOBALES (Admin uniquement) ------
-    Route::middleware('role:admin')->prefix('stats')->group(function () {
-        Route::get('/users', [UserController::class, 'stats']);
-        Route::get('/services', [ServiceController::class, 'stats']);
-        Route::get('/reservations', [ReservationController::class, 'stats']);
-        Route::get('/factures', [FactureController::class, 'stats']);
-        Route::get('/paiements', [PaiementController::class, 'stats']);
-        Route::get('/avis', [AvisController::class, 'stats']);
-        Route::get('/abonnements', [AbonnementController::class, 'stats']);
-    });
+    // Coupons
+    Route::post('/coupons/validate', [CouponController::class, 'validate']);
+    Route::apiResource('coupons', CouponController::class);
+
+    // Quality Checks
+    Route::post('/quality-checks',       [QualityCheckController::class, 'store']);
+    Route::get('/quality-checks/{qualityCheck}', [QualityCheckController::class, 'show']);
+
+    // Notifications
+    Route::get('/notifications',             [NotificationController::class, 'index']);
+    Route::get('/notifications/unread-count',[NotificationController::class, 'unreadCount']);
+    Route::post('/notifications/{id}/read',  [NotificationController::class, 'markRead']);
+    Route::post('/notifications/read-all',   [NotificationController::class, 'markAllRead']);
+    Route::delete('/notifications/{id}',     [NotificationController::class, 'destroy']);
+
+    // Loyalty
+    Route::get('/customers/{customer}/loyalty',          [LoyaltyController::class, 'transactions']);
+    Route::post('/customers/{customer}/loyalty/redeem',  [LoyaltyController::class, 'redeem']);
 });

@@ -2,152 +2,76 @@
 
 namespace App\Models;
 
-use App\Models\Abonnement;
+use App\Traits\BelongsToCompany;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
+use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable
+/**
+ * @property int $id
+ * @property string $name
+ * @property string $email
+ * @property string|null $phone
+ * @property string $password
+ * @property int|null $company_id
+ * @property int|null $station_id
+ * @property string $status
+ * @property \Illuminate\Support\Carbon|null $email_verified_at
+ * @property \Illuminate\Support\Carbon|null $last_login_at
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read Company|null $company
+ * @property-read Station|null $station
+ * @property-read Customer|null $customer
+ * @property-read Employee|null $employee
+ */
+class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
+    use HasApiTokens, HasFactory, Notifiable, SoftDeletes, HasRoles, LogsActivity, BelongsToCompany;
 
     protected $fillable = [
-        'nom',
-        'prenom',
-        'email',
-        'password',
-        'telephone',
-        'role_id',
-        'statut',
-        'email_verified_at',
-        'last_login_at',
+        'name', 'email', 'phone', 'password',
+        'company_id', 'station_id', 'status',
+        'email_verified_at', 'last_login_at',
     ];
 
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
+    protected $hidden = ['password', 'remember_token'];
 
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'last_login_at' => 'datetime',
-        'password' => 'hashed',
+        'last_login_at'     => 'datetime',
+        'password'          => 'hashed',
     ];
 
-    // ===== ACCESSEURS =====
-    public function getFullNameAttribute(): string
+    public function getActivitylogOptions(): LogOptions
     {
-        return "{$this->prenom} {$this->nom}";
+        return LogOptions::defaults()
+            ->logFillable()
+            ->logOnlyDirty()
+            ->dontLogIfAttributesChangedOnly(['last_login_at']);
     }
 
-    public function getIsAdminAttribute(): bool
-    {
-        return $this->role?->nom === 'admin';
-    }
+    public function isSuperAdmin(): bool { return $this->company_id === null; }
+    public function isAdmin(): bool      { return $this->hasRole('admin'); }
+    public function isEmployee(): bool   { return $this->hasRole('employee'); }
+    public function isCustomer(): bool   { return $this->hasRole('customer'); }
 
-    public function getIsGerantAttribute(): bool
-    {
-        return $this->role?->nom === 'gerant';
-    }
-
-    public function getIsEmployeAttribute(): bool
-    {
-        return $this->role?->nom === 'employe';
-    }
-
-    public function getIsClientAttribute(): bool
-    {
-        return $this->role?->nom === 'client';
-    }
-
-    // ===== RELATIONS =====
-    public function role(): BelongsTo
-    {
-        return $this->belongsTo(Role::class);
-    }
-
-    public function vehicules(): HasMany
-    {
-        return $this->hasMany(Vehicule::class);
-    }
-
-    public function reservationsClient(): HasMany
-    {
-        return $this->hasMany(Reservation::class, 'client_id');
-    }
-
-    public function reservationsEmploye(): HasMany
-    {
-        return $this->hasMany(Reservation::class, 'employe_id');
-    }
-
-    public function factures(): HasMany
-    {
-        return $this->hasMany(Facture::class, 'client_id');
-    }
-
-    public function paiements(): HasMany
-    {
-        return $this->hasMany(Paiement::class, 'client_id');
-    }
-
-    public function avisDonnes(): HasMany
-    {
-        return $this->hasMany(AvisClient::class, 'client_id');
-    }
-
-    public function avisRecus(): HasMany
-    {
-        return $this->hasMany(AvisClient::class, 'employe_id');
-    }
+    public function company(): BelongsTo  { return $this->belongsTo(Company::class); }
+    public function station(): BelongsTo  { return $this->belongsTo(Station::class); }
+    public function customer(): HasOne    { return $this->hasOne(Customer::class); }
+    public function employee(): HasOne    { return $this->hasOne(Employee::class); }
 
     public function notifications(): HasMany
     {
         return $this->hasMany(Notification::class);
-    }
-
-    public function abonnements(): HasMany
-    {
-        return $this->hasMany(Abonnement::class, 'client_id');
-    }
-
-    public function historiques(): HasMany
-    {
-        return $this->hasMany(ReservationHistorique::class, 'employe_id');
-    }
-
-    // ===== SCOPES =====
-    public function scopeAdmins($query)
-    {
-        return $query->whereHas('role', fn($q) => $q->where('nom', 'admin'));
-    }
-
-    public function scopeGerants($query)
-    {
-        return $query->whereHas('role', fn($q) => $q->where('nom', 'gerant'));
-    }
-
-    public function scopeEmployes($query)
-    {
-        return $query->whereHas('role', fn($q) => $q->where('nom', 'employe'));
-    }
-
-    public function scopeClients($query)
-    {
-        return $query->whereHas('role', fn($q) => $q->where('nom', 'client'));
-    }
-
-    public function scopeActifs($query)
-    {
-        return $query->where('statut', 'actif');
-    }
-
-    public function scopeEnConges($query)
-    {
-        return $query->where('statut', 'conges');
     }
 }

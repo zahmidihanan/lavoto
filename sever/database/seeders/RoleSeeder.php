@@ -3,16 +3,15 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
+/**
+ * Kept as a no-op stub. Role creation is handled by RolePermissionSeeder
+ * via spatie/laravel-permission. The old custom roles table no longer exists.
+ */
 class RoleSeeder extends Seeder
 {
     public function run(): void
     {
-        DB::table('roles')->insert([
-            ['nom' => 'admin'],
-            ['nom' => 'employe'],
-            ['nom' => 'client'],
-        ]);
+        // intentionally empty — see RolePermissionSeeder
     }
 }

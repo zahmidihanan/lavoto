@@ -3,148 +3,52 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
-use App\Models\User;
+use Spatie\Permission\Models\Role;
 
 class RolePermissionSeeder extends Seeder
 {
-    public function run()
+    public function run(): void
     {
-        // ==================== PERMISSIONS ====================
+        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+
         $permissions = [
-            'dashboard.view',
-            'users.manage',
-            'reports.view',
-            'reservations.manage',
-            'reservations.create',
-            'reservations.assign',
-            'reservations.update.status',
-            'reservations.view.own',
-            'vehicles.manage.own',
-            'services.manage',
-            'factures.pay',
-            'avis.create',
-            'location.update'
+            'company.view',
+            'company.edit',
+            'stations.view',
+            'stations.create',
+            'stations.edit',
+            'stations.delete',
+            'users.view',
+            'users.create',
+            'users.edit',
+            'users.delete',
+            'roles.view',
+            'roles.assign',
         ];
 
-        foreach ($permissions as $permission) {
-            Permission::firstOrCreate(['name' => $permission]);
+        foreach ($permissions as $name) {
+            Permission::firstOrCreate(['name' => $name, 'guard_name' => 'web']);
         }
 
-        // ==================== CRÉATION DES RÔLES ====================
-        $superAdmin = Role::firstOrCreate(['name' => 'super_admin']);
-        $admin      = Role::firstOrCreate(['name' => 'admin']);
-        $gerant     = Role::firstOrCreate(['name' => 'gerant']);
-        $employe    = Role::firstOrCreate(['name' => 'employe']);
-        $client     = Role::firstOrCreate(['name' => 'client']);
+        // Roles are created without a team scope (company_id = null) as global templates.
+        // setPermissionsTeamId scopes them per tenant at runtime.
+        $admin    = Role::firstOrCreate(['name' => 'admin',    'guard_name' => 'web']);
+        $manager  = Role::firstOrCreate(['name' => 'manager',  'guard_name' => 'web']);
+        $employee = Role::firstOrCreate(['name' => 'employee', 'guard_name' => 'web']);
+        Role::firstOrCreate(['name' => 'customer', 'guard_name' => 'web']);
 
-        // Assignation des permissions
-        $superAdmin->givePermissionTo(Permission::all());
+        $admin->syncPermissions($permissions);
 
-        $admin->givePermissionTo([
-            'dashboard.view', 'users.manage', 'reports.view', 
-            'reservations.manage', 'services.manage'
+        $manager->syncPermissions([
+            'company.view',
+            'stations.view', 'stations.create', 'stations.edit', 'stations.delete',
+            'users.view', 'users.create', 'users.edit',
         ]);
 
-        $gerant->givePermissionTo([
-            'reservations.manage', 
-            'reservations.assign', 
-            'reservations.update.status'
+        $employee->syncPermissions([
+            'stations.view',
+            'users.view',
         ]);
-
-        $employe->givePermissionTo([
-            'reservations.view.own', 
-            'reservations.update.status', 
-            'location.update'
-        ]);
-
-        $client->givePermissionTo([
-            'reservations.create', 
-            'reservations.view.own', 
-            'vehicles.manage.own',
-            'factures.pay', 
-            'avis.create'
-        ]);
-
-        // ==================== CRÉATION DES UTILISATEURS DE TEST ====================
-
-        // Super Admin
-        $superAdminUser = User::withoutGlobalScopes()->firstOrCreate(
-            ['email' => 'superadmin@lavoto.ma'],
-            [
-                'nom'       => 'Super',
-                'prenom'    => 'Admin',
-                'password'  => bcrypt('password123'),
-                'telephone' => '0612345678',
-                'role_id'   => 1,           // ID du rôle admin
-                'statut'    => 'actif'
-            ]
-        );
-        $superAdminUser->assignRole('super_admin');
-
-        // Admin normal
-        $adminUser = User::withoutGlobalScopes()->firstOrCreate(
-            ['email' => 'admin@lavoto.ma'],
-            [
-                'nom'       => 'Admin',
-                'prenom'    => 'LAVOTO',
-                'password'  => bcrypt('password123'),
-                'telephone' => '0612345679',
-                'role_id'   => 1,
-                'statut'    => 'actif'
-            ]
-        );
-        $adminUser->assignRole('admin');
-
-        // Gérant
-        $gerantUser = User::withoutGlobalScopes()->firstOrCreate(
-            ['email' => 'gerant@lavoto.ma'],
-            [
-                'nom'       => 'El',
-                'prenom'    => 'Gérant',
-                'password'  => bcrypt('password123'),
-                'telephone' => '0612345680',
-                'role_id'   => 2,
-                'statut'    => 'actif'
-            ]
-        );
-        $gerantUser->assignRole('gerant');
-
-        // Employé
-        $employeUser = User::withoutGlobalScopes()->firstOrCreate(
-            ['email' => 'employe@lavoto.ma'],
-            [
-                'nom'       => 'Ahmed',
-                'prenom'    => 'Employe',
-                'password'  => bcrypt('password123'),
-                'telephone' => '0612345681',
-                'role_id'   => 3,
-                'statut'    => 'actif'
-            ]
-        );
-        $employeUser->assignRole('employe');
-
-        // Client
-        $clientUser = User::withoutGlobalScopes()->firstOrCreate(
-            ['email' => 'client@lavoto.ma'],
-            [
-                'nom'       => 'Ilham',
-                'prenom'    => 'Client',
-                'password'  => bcrypt('password123'),
-                'telephone' => '0612345682',
-                'role_id'   => 4,
-                'statut'    => 'actif'
-            ]
-        );
-        $clientUser->assignRole('client');
-
-        $this->command->info('✅ Rôles et Permissions créés avec succès !');
-        $this->command->info('Utilisateurs de test créés :');
-        $this->command->info('• superadmin@lavoto.ma     → password: password123');
-        $this->command->info('• admin@lavoto.ma          → password: password123');
-        $this->command->info('• gerant@lavoto.ma         → password: password123');
-        $this->command->info('• employe@lavoto.ma        → password: password123');
-        $this->command->info('• client@lavoto.ma         → password: password123 (ton compte)');
     }
 }
