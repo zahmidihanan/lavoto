@@ -38,6 +38,7 @@ composer run setup
 
 ```bash
 cd client
+cp .env.example .env
 npm install
 npm run dev    # Vite dev server on http://localhost:5173
 ```
