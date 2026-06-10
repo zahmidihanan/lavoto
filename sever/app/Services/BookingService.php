@@ -84,7 +84,7 @@ class BookingService
             'pending'       => ['confirmed', 'cancelled'],
             'confirmed'     => ['assigned', 'cancelled'],
             'assigned'      => ['in_progress', 'cancelled'],
-            'in_progress'   => ['quality_check'],
+            'in_progress'   => ['quality_check', 'completed'],
             'quality_check' => ['completed', 'in_progress'],
             'completed'     => [],
             'cancelled'     => [],

@@ -76,8 +76,8 @@ class EmployeeService
         $employee->user->delete();
     }
 
-    public function availableForStation(?int $stationId = null): Collection
+    public function availableForStation(?int $stationId = null, ?string $date = null, ?string $time = null, ?int $excludeBookingId = null): Collection
     {
-        return $this->employeeRepo->availableForStation($stationId ?? 0);
+        return $this->employeeRepo->availableForStation($stationId ?? 0, $date, $time, $excludeBookingId);
     }
 }

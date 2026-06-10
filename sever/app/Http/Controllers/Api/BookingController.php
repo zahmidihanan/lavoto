@@ -22,7 +22,16 @@ class BookingController extends Controller
     public function index(Request $request): JsonResponse
     {
         $this->authorize('viewAny', Booking::class);
-        $paginator = $this->bookingService->paginate($request->all());
+        $filters = $request->all();
+
+        // Employees see only bookings assigned to them
+        /** @var \App\Models\User $user */
+        $user = $request->user();
+        if ($user->hasRole('employee') && $user->employee) {
+            $filters['employee_id'] = $user->employee->id;
+        }
+
+        $paginator = $this->bookingService->paginate($filters);
         return $this->paginated(BookingResource::collection($paginator));
     }
 

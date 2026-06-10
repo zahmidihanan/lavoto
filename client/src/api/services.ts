@@ -79,8 +79,8 @@ export const customersApi = {
 export const employeesApi = {
   list: (params?: PaginationParams) =>
     api.get<PaginatedResponse<Employee>>('/employees', { params }),
-  available: (station_id?: number) =>
-    api.get<ApiResponse<Employee[]>>('/employees/available', { params: { station_id } }),
+  available: (params?: { station_id?: number; date?: string; time?: string; exclude_booking_id?: number }) =>
+    api.get<ApiResponse<Employee[]>>('/employees/available', { params }),
   get: (id: number) => api.get<ApiResponse<Employee>>(`/employees/${id}`),
   create: (data: Record<string, unknown>) =>
     api.post<ApiResponse<Employee>>('/employees', data),
@@ -215,4 +215,6 @@ export const publicApi = {
     api.get<ApiResponse<Station[]>>(`/public/${slug}/stations`),
   book: (slug: string, data: PublicBookingPayload) =>
     api.post<ApiResponse<PublicBookingResult>>(`/public/${slug}/book`, data),
+  availability: (slug: string, params: { date: string; station_id?: number }) =>
+    api.get<ApiResponse<{ full_slots: string[]; has_employees: boolean }>>(`/public/${slug}/availability`, { params }),
 }

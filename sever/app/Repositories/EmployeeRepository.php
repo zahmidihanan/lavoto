@@ -45,9 +45,26 @@ class EmployeeRepository extends BaseRepository implements EmployeeRepositoryInt
         return $employee->delete();
     }
 
-    public function availableForStation(int $stationId): Collection
+    public function availableForStation(int $stationId, ?string $date = null, ?string $time = null, ?int $excludeBookingId = null): Collection
     {
-        return Employee::where('station_id', $stationId)->with('user')->get();
+        $query = Employee::with('user');
+
+        if ($stationId > 0) {
+            $query->where('station_id', $stationId);
+        }
+
+        if ($date && $time) {
+            $query->whereDoesntHave('bookings', function ($q) use ($date, $time, $excludeBookingId) {
+                $q->whereDate('booking_date', $date)
+                  ->where('booking_time', $time)
+                  ->whereNotIn('status', ['cancelled', 'completed']);
+                if ($excludeBookingId) {
+                    $q->where('bookings.id', '!=', $excludeBookingId);
+                }
+            });
+        }
+
+        return $query->get();
     }
 
     protected function searchableColumns(): array { return ['employee_code']; }

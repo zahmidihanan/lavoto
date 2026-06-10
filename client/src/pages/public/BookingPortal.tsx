@@ -150,7 +150,6 @@ interface BookingResult {
 export function BookingPortal() {
   const { slug } = useParams<{ slug: string }>()
   const navigate = useNavigate()
-
   const [step, setStep] = useState<Step>(1)
   const [selectedService, setSelectedService] = useState<Service | null>(null)
   const [selectedStation, setSelectedStation] = useState<Station | null>(null)
@@ -180,6 +179,18 @@ export function BookingPortal() {
     queryFn: () => publicApi.stations(slug!).then((r) => r.data.data),
     enabled: !!slug,
   })
+
+  const { data: availability } = useQuery({
+    queryKey: ['public-availability', slug, selectedStation?.id, selectedDate],
+    queryFn: () =>
+      publicApi
+        .availability(slug!, { date: selectedDate, station_id: selectedStation?.id })
+        .then((r) => r.data.data),
+    enabled: !!slug && !!selectedDate && !!selectedStation,
+    staleTime: 30_000,
+  })
+
+  const fullSlots = new Set(availability?.full_slots ?? [])
 
   const bookMutation = useMutation({
     mutationFn: (info: FormData) => {
@@ -384,7 +395,7 @@ export function BookingPortal() {
                     <button
                       key={st.id}
                       type="button"
-                      onClick={() => setSelectedStation(st)}
+                      onClick={() => { setSelectedStation(st); setSelectedTime('') }}
                       className={cn(
                         'w-full text-left rounded-xl border-2 p-4 transition-all',
                         selectedStation?.id === st.id
@@ -412,7 +423,7 @@ export function BookingPortal() {
                 type="date"
                 min={today}
                 value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
+                onChange={(e) => { setSelectedDate(e.target.value); setSelectedTime('') }}
                 className="bg-white"
               />
             </div>
@@ -424,21 +435,28 @@ export function BookingPortal() {
                   <Clock className="h-4 w-4 text-gray-400" /> Time
                 </p>
                 <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
-                  {TIME_SLOTS.map((t) => (
-                    <button
-                      key={t.value}
-                      type="button"
-                      onClick={() => setSelectedTime(t.value)}
-                      className={cn(
-                        'rounded-lg border py-2 text-xs font-medium transition-all',
-                        selectedTime === t.value
-                          ? 'border-blue-600 bg-blue-600 text-white'
-                          : 'border-gray-200 bg-white text-gray-600 hover:border-blue-400'
-                      )}
-                    >
-                      {t.label}
-                    </button>
-                  ))}
+                  {TIME_SLOTS.map((t) => {
+                    const isFull = fullSlots.has(t.value)
+                    return (
+                      <button
+                        key={t.value}
+                        type="button"
+                        disabled={isFull}
+                        onClick={() => !isFull && setSelectedTime(t.value)}
+                        className={cn(
+                          'rounded-lg border py-2 text-xs font-medium transition-all flex flex-col items-center gap-0.5',
+                          isFull
+                            ? 'border-gray-100 bg-gray-50 text-gray-300 cursor-not-allowed'
+                            : selectedTime === t.value
+                            ? 'border-blue-600 bg-blue-600 text-white'
+                            : 'border-gray-200 bg-white text-gray-600 hover:border-blue-400'
+                        )}
+                      >
+                        <span>{t.label}</span>
+                        {isFull && <span className="text-[10px] font-semibold text-red-400">Full</span>}
+                      </button>
+                    )
+                  })}
                 </div>
               </div>
             )}

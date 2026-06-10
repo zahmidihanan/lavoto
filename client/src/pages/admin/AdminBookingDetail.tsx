@@ -2,11 +2,10 @@ import React, { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { ArrowLeft, UserCheck, Ban } from 'lucide-react'
+import { ArrowLeft, UserCheck, Ban, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { BookingStatusBadge } from '@/components/shared/BookingStatusBadge'
 import { FormField } from '@/components/shared/FormField'
@@ -15,6 +14,7 @@ import type { BookingStatus } from '@/types'
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from '@/components/ui/dialog'
+import { cn } from '@/utils/cn'
 
 const NEXT_STATUSES: Record<BookingStatus, BookingStatus[]> = {
   pending:       ['confirmed', 'cancelled'],
@@ -40,11 +40,35 @@ export function AdminBookingDetail() {
     queryFn: () => bookingsApi.get(Number(id)).then((r) => r.data.data),
   })
 
-  const { data: employees } = useQuery({
-    queryKey: ['employees-available'],
-    queryFn: () => employeesApi.available().then((r) => r.data.data),
+  // All employees for this company
+  const { data: allEmployees } = useQuery({
+    queryKey: ['employees-all'],
+    queryFn: () => employeesApi.list({ per_page: 100 }).then((r) => r.data.data),
     enabled: assignDialog,
   })
+
+  // Available employees at this booking's date+time+station
+  const { data: availableEmployees } = useQuery({
+    queryKey: ['employees-available-slot', booking?.station_id, booking?.booking_date, booking?.booking_time, id],
+    queryFn: () =>
+      employeesApi
+        .available({
+          station_id: booking?.station_id ?? undefined,
+          date: booking?.booking_date?.slice(0, 10),
+          time: booking?.booking_time?.slice(0, 5),
+          exclude_booking_id: Number(id),
+        })
+        .then((r) => r.data.data),
+    enabled: assignDialog && !!booking,
+  })
+
+  const availableIds = new Set((availableEmployees ?? []).map((e) => e.id))
+
+  // Pre-select currently assigned employees when dialog opens
+  const openAssignDialog = () => {
+    setSelectedEmployees((booking?.employees ?? []).map((e) => e.id))
+    setAssignDialog(true)
+  }
 
   const updateStatus = useMutation({
     mutationFn: (status: BookingStatus) =>
@@ -84,6 +108,7 @@ export function AdminBookingDetail() {
   if (!booking) return <div className="text-center py-20 text-muted-foreground">Booking not found</div>
 
   const nextStatuses = NEXT_STATUSES[booking.status] ?? []
+  const canAssign = booking.status === 'confirmed' || booking.status === 'assigned'
 
   return (
     <div className="space-y-6">
@@ -108,8 +133,8 @@ export function AdminBookingDetail() {
               Cancel
             </Button>
           )}
-          {booking.status === 'confirmed' && (
-            <Button size="sm" onClick={() => setAssignDialog(true)}>
+          {canAssign && (
+            <Button size="sm" onClick={openAssignDialog}>
               <UserCheck className="h-3.5 w-3.5 mr-1" />
               Assign Employees
             </Button>
@@ -162,6 +187,12 @@ export function AdminBookingDetail() {
             <div className="flex justify-between">
               <span className="text-muted-foreground">Station</span>
               <span>{booking.station?.name ?? '—'}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Date / Time</span>
+              <span className="font-medium">
+                {booking.booking_date?.slice(0, 10)} · {booking.booking_time?.slice(0, 5)}
+              </span>
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Total</span>
@@ -225,28 +256,62 @@ export function AdminBookingDetail() {
       {/* Assign employees dialog */}
       <Dialog open={assignDialog} onOpenChange={setAssignDialog}>
         <DialogContent>
-          <DialogHeader><DialogTitle>Assign Employees</DialogTitle></DialogHeader>
-          <div className="space-y-2 max-h-64 overflow-y-auto">
-            {(employees ?? []).map((e) => (
-              <label key={e.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={selectedEmployees.includes(e.id)}
-                  onChange={(ev) =>
-                    setSelectedEmployees(
-                      ev.target.checked
-                        ? [...selectedEmployees, e.id]
-                        : selectedEmployees.filter((x) => x !== e.id)
-                    )
-                  }
-                  className="h-4 w-4"
-                />
-                <span className="text-sm font-medium">{e.user?.name}</span>
-                <span className="text-xs text-muted-foreground ml-auto">{e.employee_code}</span>
-              </label>
-            ))}
-            {!employees?.length && (
-              <p className="text-sm text-muted-foreground text-center py-4">No available employees</p>
+          <DialogHeader>
+            <DialogTitle>Assign Employees</DialogTitle>
+            <p className="text-xs text-muted-foreground pt-1">
+              {booking.booking_date?.slice(0, 10)} at {booking.booking_time?.slice(0, 5)} — Employees already booked at this time are shown as busy.
+            </p>
+          </DialogHeader>
+          <div className="space-y-1.5 max-h-72 overflow-y-auto">
+            {!allEmployees ? (
+              Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="h-12 rounded-lg bg-muted animate-pulse" />
+              ))
+            ) : allEmployees.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-4">No employees found</p>
+            ) : (
+              allEmployees.map((e) => {
+                const isBusy = availableEmployees !== undefined && !availableIds.has(e.id)
+                const isChecked = selectedEmployees.includes(e.id)
+
+                return (
+                  <label
+                    key={e.id}
+                    className={cn(
+                      'flex items-center gap-3 p-3 rounded-lg border transition-colors',
+                      isBusy
+                        ? 'opacity-50 cursor-not-allowed bg-muted/40 border-muted'
+                        : 'cursor-pointer hover:bg-muted border-transparent hover:border-border',
+                      isChecked && !isBusy && 'bg-primary/5 border-primary/30'
+                    )}
+                  >
+                    <input
+                      type="checkbox"
+                      disabled={isBusy}
+                      checked={isChecked}
+                      onChange={(ev) =>
+                        setSelectedEmployees(
+                          ev.target.checked
+                            ? [...selectedEmployees, e.id]
+                            : selectedEmployees.filter((x) => x !== e.id)
+                        )
+                      }
+                      className="h-4 w-4 shrink-0"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{e.user?.name ?? '—'}</p>
+                      <p className="text-xs text-muted-foreground">{e.employee_code}</p>
+                    </div>
+                    {isBusy ? (
+                      <span className="flex items-center gap-1 text-xs text-amber-600 shrink-0">
+                        <AlertCircle className="h-3.5 w-3.5" /> Busy
+                      </span>
+                    ) : (
+                      <span className="text-xs text-emerald-600 shrink-0">Available</span>
+                    )}
+                  </label>
+                )
+              })
             )}
           </div>
           <DialogFooter>

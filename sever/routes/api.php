@@ -33,9 +33,10 @@ Route::get('/services/active', [ServiceController::class, 'active']);
 // Public booking portal — shareable per-company link (no auth required)
 Route::prefix('public')->group(function () {
     Route::get('{slug}',          [PublicBookingController::class, 'company']);
-    Route::get('{slug}/services', [PublicBookingController::class, 'services']);
-    Route::get('{slug}/stations', [PublicBookingController::class, 'stations']);
-    Route::post('{slug}/book',    [PublicBookingController::class, 'book']);
+    Route::get('{slug}/services',     [PublicBookingController::class, 'services']);
+    Route::get('{slug}/stations',     [PublicBookingController::class, 'stations']);
+    Route::get('{slug}/availability', [PublicBookingController::class, 'availability']);
+    Route::post('{slug}/book',        [PublicBookingController::class, 'book']);
 });
 
 // ── Authenticated (Sanctum token) ──────────────────────────────────────────

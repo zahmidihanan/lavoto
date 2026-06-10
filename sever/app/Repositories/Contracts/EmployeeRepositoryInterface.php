@@ -13,5 +13,5 @@ interface EmployeeRepositoryInterface
     public function create(array $data): Employee;
     public function update(Employee $employee, array $data): Employee;
     public function delete(Employee $employee): bool;
-    public function availableForStation(int $stationId): \Illuminate\Database\Eloquent\Collection;
+    public function availableForStation(int $stationId, ?string $date = null, ?string $time = null, ?int $excludeBookingId = null): \Illuminate\Database\Eloquent\Collection;
 }

@@ -59,8 +59,16 @@ class EmployeeController extends Controller
     public function available(Request $request): JsonResponse
     {
         $this->authorize('viewAny', Employee::class);
-        $stationId = $request->query('station_id');
-        $employees = $this->employeeService->availableForStation($stationId);
+        $excludeBookingId = $request->query('exclude_booking_id')
+            ? (int) $request->query('exclude_booking_id')
+            : null;
+
+        $employees = $this->employeeService->availableForStation(
+            $request->query('station_id'),
+            $request->query('date'),
+            $request->query('time'),
+            $excludeBookingId,
+        );
         return $this->success(EmployeeResource::collection($employees));
     }
 }

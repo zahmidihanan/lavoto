@@ -25,6 +25,11 @@ class BookingRepository extends BaseRepository implements BookingRepositoryInter
         if (!empty($filters['station_id'])) {
             $query->where('station_id', $filters['station_id']);
         }
+        if (!empty($filters['employee_id'])) {
+            $query->whereHas('employees', function ($q) use ($filters) {
+                $q->where('employees.id', $filters['employee_id']);
+            });
+        }
         if (!empty($filters['date_from'])) {
             $query->whereDate('booking_date', '>=', $filters['date_from']);
         }

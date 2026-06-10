@@ -61,6 +61,69 @@ class PublicBookingController extends Controller
         return $this->success($stations);
     }
 
+    public function availability(Request $request, string $slug): JsonResponse
+    {
+        $company = $this->findCompany($slug);
+
+        $request->validate([
+            'date'       => 'required|date',
+            'station_id' => 'nullable|integer',
+        ]);
+
+        $date      = $request->query('date');
+        $stationId = (int) $request->query('station_id', 0);
+
+        // Total active employees for this company (optionally scoped to station)
+        $empQuery = \App\Models\Employee::where('company_id', $company->id);
+        if ($stationId > 0) {
+            $empQuery->where('station_id', $stationId);
+        }
+        $totalEmployees = $empQuery->count();
+
+        if ($totalEmployees === 0) {
+            return $this->success(['full_slots' => [], 'has_employees' => false]);
+        }
+
+        // Bookings on this date that are still active and have assigned employees
+        $bookings = \App\Models\Booking::where('company_id', $company->id)
+            ->whereDate('booking_date', $date)
+            ->whereNotIn('status', ['cancelled', 'completed'])
+            ->with(['employees' => function ($q) use ($company, $stationId) {
+                $q->where('employees.company_id', $company->id);
+                if ($stationId > 0) {
+                    $q->where('employees.station_id', $stationId);
+                }
+            }])
+            ->get();
+
+        // Group busy employee IDs by time slot
+        $busyBySlot = [];
+        foreach ($bookings as $booking) {
+            $raw  = $booking->booking_time;
+            $time = is_object($raw) ? $raw->format('H:i') : substr((string) $raw, 0, 5);
+            if (! isset($busyBySlot[$time])) {
+                $busyBySlot[$time] = [];
+            }
+            foreach ($booking->employees as $emp) {
+                $busyBySlot[$time][] = $emp->id;
+            }
+        }
+
+        // A slot is "full" when every employee is busy
+        $fullSlots = [];
+        foreach ($busyBySlot as $time => $employeeIds) {
+            if (count(array_unique($employeeIds)) >= $totalEmployees) {
+                $fullSlots[] = $time;
+            }
+        }
+
+        return $this->success([
+            'full_slots'      => array_values($fullSlots),
+            'total_employees' => $totalEmployees,
+            'has_employees'   => true,
+        ]);
+    }
+
     public function book(Request $request, string $slug): JsonResponse
     {
         $company = $this->findCompany($slug);
