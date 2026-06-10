@@ -49,11 +49,10 @@ export function AdminBookingDetail() {
 
   // Available employees at this booking's date+time+station
   const { data: availableEmployees } = useQuery({
-    queryKey: ['employees-available-slot', booking?.station_id, booking?.booking_date, booking?.booking_time, id],
+    queryKey: ['employees-available-slot', booking?.booking_date, booking?.booking_time, id],
     queryFn: () =>
       employeesApi
         .available({
-          station_id: booking?.station_id ?? undefined,
           date: booking?.booking_date?.slice(0, 10),
           time: booking?.booking_time?.slice(0, 5),
           exclude_booking_id: Number(id),
