@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import {
   DollarSign, Users, CalendarCheck, CheckCircle, TrendingUp,
+  Link2, Copy, CheckCheck,
 } from 'lucide-react'
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -13,6 +14,7 @@ import { BookingStatusBadge } from '@/components/shared/BookingStatusBadge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { dashboardApi } from '@/api/services'
+import { useAuthStore } from '@/stores/auth.store'
 import type { BookingStatus } from '@/types'
 
 const PERIOD_OPTIONS = [
@@ -29,6 +31,49 @@ const STATUS_COLORS: Record<BookingStatus, string> = {
   quality_check: '#f97316',
   completed: '#10b981',
   cancelled: '#ef4444',
+}
+
+function ShareableLinkCard() {
+  const { user } = useAuthStore()
+  const slug = user?.company?.slug
+  const [copied, setCopied] = useState(false)
+
+  if (!slug) return null
+
+  const bookingUrl = `${window.location.origin}/book/${slug}`
+
+  const copy = () => {
+    navigator.clipboard.writeText(bookingUrl)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  return (
+    <Card className="border-blue-200 bg-linear-to-r from-blue-50 to-indigo-50">
+      <CardContent className="py-4 px-5">
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-9 h-9 bg-blue-600 rounded-lg flex items-center justify-center shrink-0">
+              <Link2 className="h-4 w-4 text-white" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs font-medium text-blue-700 mb-0.5">Your Customer Booking Link</p>
+              <p className="text-sm font-mono text-blue-900 truncate">{bookingUrl}</p>
+            </div>
+          </div>
+          <div className="flex gap-2 shrink-0">
+            <Button size="sm" variant="outline" className="border-blue-300 text-blue-700 hover:bg-blue-100" onClick={copy}>
+              {copied ? <CheckCheck className="h-3.5 w-3.5 mr-1.5" /> : <Copy className="h-3.5 w-3.5 mr-1.5" />}
+              {copied ? 'Copied!' : 'Copy Link'}
+            </Button>
+            <Button size="sm" className="bg-blue-600 hover:bg-blue-700" onClick={() => window.open(bookingUrl, '_blank')}>
+              Preview
+            </Button>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  )
 }
 
 export function AdminDashboard() {
@@ -72,6 +117,8 @@ export function AdminDashboard() {
           </div>
         }
       />
+
+      <ShareableLinkCard />
 
       {/* Stat cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">

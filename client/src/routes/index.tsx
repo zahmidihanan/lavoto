@@ -6,6 +6,7 @@ import { DashboardLayout } from '@/layouts/DashboardLayout'
 
 // Public
 import { HomePage } from '@/pages/public/HomePage'
+import { BookingPortal } from '@/pages/public/BookingPortal'
 import { LoginPage } from '@/pages/auth/LoginPage'
 import { RegisterPage } from '@/pages/auth/RegisterPage'
 import { ForgotPasswordPage } from '@/pages/auth/ForgotPasswordPage'
@@ -45,6 +46,7 @@ const router = createBrowserRouter([
   // ── Public ────────────────────────────────────────────────────────────────
   { path: '/', element: <HomePage /> },
   { path: '/unauthorized', element: <div className="min-h-screen flex items-center justify-center"><p className="text-lg font-medium text-muted-foreground">Access denied.</p></div> },
+  { path: '/book/:slug', element: <BookingPortal /> },
 
   // ── Auth (public-only) ────────────────────────────────────────────────────
   {

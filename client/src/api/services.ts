@@ -178,3 +178,41 @@ export const usersApi = {
     api.put<ApiResponse<User>>(`/users/${id}`, data),
   delete: (id: number) => api.delete<ApiResponse<null>>(`/users/${id}`),
 }
+
+// ─── Public Booking Portal (no auth) ─────────────────────────────────────────
+
+export interface PublicBookingPayload {
+  name: string
+  email: string
+  phone?: string
+  brand: string
+  model: string
+  year: number
+  color?: string
+  plate_number: string
+  service_id: number
+  station_id: number
+  booking_date: string
+  booking_time: string
+  notes?: string
+}
+
+export interface PublicBookingResult {
+  booking_id: number
+  booking_date: string
+  booking_time: string
+  company_name: string
+  service_name: string
+  total_amount: string
+}
+
+export const publicApi = {
+  company: (slug: string) =>
+    api.get<ApiResponse<{ id: number; name: string; slug: string }>>(`/public/${slug}`),
+  services: (slug: string) =>
+    api.get<ApiResponse<Service[]>>(`/public/${slug}/services`),
+  stations: (slug: string) =>
+    api.get<ApiResponse<Station[]>>(`/public/${slug}/stations`),
+  book: (slug: string, data: PublicBookingPayload) =>
+    api.post<ApiResponse<PublicBookingResult>>(`/public/${slug}/book`, data),
+}

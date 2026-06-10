@@ -14,7 +14,8 @@ class Customer extends Model
 
     protected $fillable = ['user_id', 'company_id', 'address', 'loyalty_points'];
 
-    public function user(): BelongsTo  { return $this->belongsTo(User::class); }
+    // Bypass tenant scope — a customer's user may belong to a different company (public portal bookings)
+    public function user(): BelongsTo  { return $this->belongsTo(User::class)->withoutGlobalScope('company'); }
     public function company(): BelongsTo { return $this->belongsTo(Company::class); }
 
     public function vehicles(): HasMany { return $this->hasMany(Vehicle::class); }

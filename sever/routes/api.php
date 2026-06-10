@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\PublicBookingController;
 use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\CouponController;
 use App\Http\Controllers\Api\CustomerController;
@@ -28,6 +29,14 @@ Route::prefix('auth')->group(function () {
 
 // Public services list
 Route::get('/services/active', [ServiceController::class, 'active']);
+
+// Public booking portal — shareable per-company link (no auth required)
+Route::prefix('public')->group(function () {
+    Route::get('{slug}',          [PublicBookingController::class, 'company']);
+    Route::get('{slug}/services', [PublicBookingController::class, 'services']);
+    Route::get('{slug}/stations', [PublicBookingController::class, 'stations']);
+    Route::post('{slug}/book',    [PublicBookingController::class, 'book']);
+});
 
 // ── Authenticated (Sanctum token) ──────────────────────────────────────────
 Route::middleware('auth:sanctum')->group(function () {
