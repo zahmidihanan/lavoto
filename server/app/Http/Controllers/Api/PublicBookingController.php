@@ -12,6 +12,7 @@ use App\Models\Service;
 use App\Models\Station;
 use App\Models\User;
 use App\Models\Vehicle;
+use App\Repositories\Contracts\EmployeeRepositoryInterface;
 use App\Services\NotificationService;
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
@@ -25,6 +26,7 @@ class PublicBookingController extends Controller
 
     public function __construct(
         private readonly NotificationService $notificationService,
+        private readonly EmployeeRepositoryInterface $employeeRepo,
     ) {}
 
     private function findCompany(string $slug): Company
@@ -169,6 +171,18 @@ class PublicBookingController extends Controller
             ->where('status', 'active')
             ->firstOrFail();
 
+        // An employee must be free at this station/date/time before we accept the booking
+        $availableEmployee = $this->employeeRepo
+            ->availableForStation($validated['station_id'], $validated['booking_date'], $validated['booking_time'])
+            ->first();
+
+        if (! $availableEmployee) {
+            throw new \App\Exceptions\ApiException(
+                'No employee available for this date and time. Please choose another slot.',
+                422,
+            );
+        }
+
         // Email is globally unique — search without company scope
         $user = User::withoutGlobalScope('company')
             ->where('email', $validated['email'])
@@ -222,10 +236,12 @@ class PublicBookingController extends Controller
             'booking_date'    => $validated['booking_date'],
             'booking_time'    => $validated['booking_time'],
             'notes'           => $validated['notes'] ?? null,
-            'status'          => 'pending',
+            'status'          => 'assigned',
             'total_amount'    => $service->price,
             'discount_amount' => 0,
         ]);
+
+        $booking->employees()->attach($availableEmployee->id);
 
         Payment::create([
             'booking_id'      => $booking->id,
@@ -266,7 +282,23 @@ class PublicBookingController extends Controller
                     'amount'        => $booking->total_amount,
                 ],
             );
+
+            $this->notificationService->send(
+                userId: $admin->id,
+                title:  'Employee Assigned',
+                body:   "{$availableEmployee->user->name} was automatically assigned to booking #{$booking->id}.",
+                type:   'booking_assigned',
+                data:   ['booking_id' => $booking->id, 'employee_id' => $availableEmployee->id],
+            );
         }
+
+        $this->notificationService->send(
+            userId: $availableEmployee->user_id,
+            title:  'New Assignment',
+            body:   "You've been assigned to booking #{$booking->id} — {$service->name} on {$booking->booking_date} at {$booking->booking_time}.",
+            type:   'booking_assigned',
+            data:   ['booking_id' => $booking->id],
+        );
 
         return $this->created([
             'booking_id'   => $booking->id,

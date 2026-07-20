@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useForm } from 'react-hook-form'
+import { useForm, type Resolver } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { toast } from 'sonner'
@@ -14,7 +14,8 @@ import { Badge } from '@/components/ui/badge'
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from '@/components/ui/dialog'
-import { employeesApi } from '@/api/services'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { employeesApi, stationsApi } from '@/api/services'
 import type { Employee } from '@/types'
 
 const schema = z.object({
@@ -25,6 +26,7 @@ const schema = z.object({
   employee_code: z.string().min(1),
   hire_date: z.string(),
   salary: z.string().optional(),
+  station_id: z.coerce.number().optional(),
 })
 type FormData = z.infer<typeof schema>
 
@@ -40,8 +42,14 @@ export function AdminEmployees() {
     queryFn: () => employeesApi.list({ page, search }).then((r) => r.data),
   })
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<FormData>({
-    resolver: zodResolver(schema),
+  const { data: stationsData } = useQuery({
+    queryKey: ['stations', 'all'],
+    queryFn: () => stationsApi.list({ per_page: 100 }).then((r) => r.data),
+  })
+  const stations = stationsData?.data ?? []
+
+  const { register, handleSubmit, reset, watch, setValue, formState: { errors } } = useForm<FormData>({
+    resolver: zodResolver(schema) as Resolver<FormData>,
   })
 
   const openCreate = () => { setEditing(null); reset({}); setOpen(true) }
@@ -54,6 +62,7 @@ export function AdminEmployees() {
       employee_code: e.employee_code,
       hire_date: e.hire_date,
       salary: e.salary,
+      station_id: e.station_id,
     })
     setOpen(true)
   }
@@ -154,6 +163,19 @@ export function AdminEmployees() {
             </div>
             <FormField label="Salary" error={errors.salary?.message}>
               <Input type="number" step="0.01" {...register('salary')} />
+            </FormField>
+            <FormField label="Station" error={errors.station_id?.message}>
+              <Select
+                value={watch('station_id') ? String(watch('station_id')) : ''}
+                onValueChange={(v) => setValue('station_id', Number(v), { shouldValidate: true })}
+              >
+                <SelectTrigger><SelectValue placeholder="Select a station" /></SelectTrigger>
+                <SelectContent>
+                  {stations.map((s) => (
+                    <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </FormField>
             {!editing && (
               <FormField label="Password" error={errors.password?.message} required>

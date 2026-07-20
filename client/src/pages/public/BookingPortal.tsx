@@ -191,8 +191,9 @@ export function BookingPortal() {
     staleTime: 5_000,
   })
 
+  const noStaff = availability?.has_employees === false
   const fullSlots = new Set(availability?.full_slots ?? [])
-  const allFull = fullSlots.size >= TIME_SLOTS.length
+  const allFull = noStaff || fullSlots.size >= TIME_SLOTS.length
 
   useEffect(() => {
     if (allFull) setSelectedTime('')
@@ -446,8 +447,12 @@ export function BookingPortal() {
                 </p>
                 {allFull ? (
                   <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-center">
-                    <p className="text-sm font-medium text-red-700">No time slots available on this date</p>
-                    <p className="text-xs text-red-500 mt-1">Please choose another date</p>
+                    <p className="text-sm font-medium text-red-700">
+                      {noStaff ? 'No staff available at this station' : 'No time slots available on this date'}
+                    </p>
+                    <p className="text-xs text-red-500 mt-1">
+                      {noStaff ? 'Please choose another station' : 'Please choose another date'}
+                    </p>
                   </div>
                 ) : (
                   <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
