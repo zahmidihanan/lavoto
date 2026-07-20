@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
+import { vehiclesApi } from '@/api/services'
 
 export default function Vehicules() {
   const [vehicules, setVehicules] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [submitError, setSubmitError] = useState(null);
 
   const [form, setForm] = useState({
     immatriculation: "",
@@ -17,13 +19,8 @@ export default function Vehicules() {
       setError(null);
 
       try {
-        const response = await fetch("http://127.0.0.1:8000/api/vehicules");
-        if (!response.ok) {
-          throw new Error(`API error ${response.status}`);
-        }
-
-        const data = await response.json();
-        setVehicules(data.vehicules || []);
+        const response = await vehiclesApi.list({ per_page: 100 });
+        setVehicules(response.data.data || []);
       } catch (fetchError) {
         setError("Impossible de charger les véhicules depuis l'API.");
         console.error(fetchError);
@@ -35,19 +32,37 @@ export default function Vehicules() {
     loadVehicules();
   }, []);
 
-  const addVehicule = () => {
+  const addVehicule = async () => {
+    setSubmitError(null);
+
     if (!form.immatriculation) return;
 
-    setVehicules([
-      ...vehicules,
-      { ...form, id: Date.now() }
-    ]);
+    try {
+      const response = await vehiclesApi.create({
+        plate_number: form.immatriculation,
+        brand: "Inconnu",
+        model: "Inconnu",
+        year: new Date().getFullYear(),
+        company_id: 0,
+        customer_id: 0,
+      });
 
-    setForm({ immatriculation: "", kilometrage: "", commentaire: "" });
+      setVehicules([response.data.data, ...vehicules]);
+      setForm({ immatriculation: "", kilometrage: "", commentaire: "" });
+    } catch (createError) {
+      setSubmitError("Impossible d'ajouter le véhicule. Vérifiez les informations et réessayez.");
+      console.error(createError);
+    }
   };
 
-  const deleteVehicule = (id) => {
-    setVehicules(vehicules.filter(v => v.id !== id));
+  const deleteVehicule = async (id) => {
+    try {
+      await vehiclesApi.delete(id);
+      setVehicules(vehicules.filter(v => v.id !== id));
+    } catch (deleteError) {
+      setSubmitError("Impossible de supprimer le véhicule. Réessayez plus tard.");
+      console.error(deleteError);
+    }
   };
 
   return (

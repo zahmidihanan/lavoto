@@ -65,7 +65,8 @@ export function useNotifications() {
         qc.invalidateQueries({ queryKey: ['notifications-unread'] })
       })
 
-      es.onerror = () => {
+      es.onerror = (event) => {
+        console.error('Notification SSE error', event)
         es.close()
         esRef.current = null
         reconnectTimeoutRef.current = setTimeout(connect, 5000)

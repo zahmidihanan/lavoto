@@ -9,6 +9,7 @@ use App\Services\NotificationService;
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Laravel\Sanctum\PersonalAccessToken;
 
 class NotificationController extends Controller
@@ -49,7 +50,7 @@ class NotificationController extends Controller
         return $this->noContent();
     }
 
-    public function stream(Request $request): \Symfony\Component\HttpFoundation\StreamedResponse
+    public function stream(Request $request): Response
     {
         $token = $request->query('token');
         if (!$token) {

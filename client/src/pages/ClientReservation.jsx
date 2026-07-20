@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { bookingsApi, servicesApi, vehiclesApi } from '@/api/services'
 
 const fallbackVehicules = [
   { id: 1, marque: "Dacia Sandero", immatriculation: "12345-أ-6", libelle: "Dacia Sandero (12345-أ-6)" },
@@ -6,9 +7,9 @@ const fallbackVehicules = [
 ];
 
 const fallbackServices = [
-  { id: 1, nom: "Lavage Extérieur", prix_base: "40 DH", duree_estimee: "20 min" },
-  { id: 2, nom: "Lavage Complet", prix_base: "80 DH", duree_estimee: "45 min" },
-  { id: 3, nom: "Lavage Premium", prix_base: "250 DH", duree_estimee: "2h" }
+  { id: 1, name: "Lavage Extérieur", price: "40 DH", duration_minutes: 20 },
+  { id: 2, name: "Lavage Complet", price: "80 DH", duration_minutes: 45 },
+  { id: 3, name: "Lavage Premium", price: "250 DH", duration_minutes: 120 }
 ];
 
 const fallbackReservations = [
@@ -49,36 +50,35 @@ export default function ClientReservation() {
 
       try {
         const [servicesRes, vehiculesRes, reservationsRes] = await Promise.all([
-          fetch("http://127.0.0.1:8000/api/services?all=true", { credentials: 'include' }),
-          fetch("http://127.0.0.1:8000/api/vehicules", { credentials: 'include' }),
-          fetch("http://127.0.0.1:8000/api/reservations?per_page=10", { credentials: 'include' }),
+          servicesApi.active(),
+          vehiclesApi.list({ per_page: 100 }),
+          bookingsApi.list({ per_page: 10 }),
         ]);
 
-        if (servicesRes.ok) {
-          const data = await servicesRes.json();
-          setServices(data.services || fallbackServices);
+        if (servicesRes.data?.data) {
+          setServices(servicesRes.data.data || fallbackServices);
         }
 
-        if (vehiculesRes.ok) {
-          const data = await vehiculesRes.json();
-          setVehicules((data.vehicules || []).map(v => ({
+        if (vehiculesRes.data?.data) {
+          setVehicules((vehiculesRes.data.data || []).map((v) => ({
             id: v.id,
-            marque: v.marque || v.libelle_complet || `${v.modele || ""}`,
-            immatriculation: v.immatriculation || "",
-            libelle: v.libelle_complet || `${v.marque || ""} (${v.immatriculation || ""})`
+            marque: v.brand || v.model || `${v.brand || ""}`,
+            immatriculation: v.plate_number || "",
+            libelle: v.plate_number
+              ? `${v.brand || ""} ${v.model || ""} (${v.plate_number})`
+              : `${v.brand || ""} ${v.model || ""}`,
           })));
         }
 
-        if (reservationsRes.ok) {
-          const data = await reservationsRes.json();
-          setMesReservations((data.reservations || []).map((res) => ({
+        if (reservationsRes.data?.data) {
+          setMesReservations((reservationsRes.data.data || []).map((res) => ({
             id: res.id,
-            vehicule: res.vehicule?.libelle_complet || res.vehicule?.immatriculation || "N/A",
-            service: res.service?.nom || res.service || "N/A",
-            date: res.date_debut?.split(' ')[0] || res.date_debut || "N/A",
-            heure: res.date_debut?.split(' ')[1] || res.heure || "N/A",
-            statut: res.statut || "En attente",
-            prix: res.prix_estime || "0 DH"
+            vehicule: res.vehicle?.plate_number || res.vehicle?.brand || "N/A",
+            service: res.service?.name || "N/A",
+            date: res.booking_date || "N/A",
+            heure: res.booking_time || "N/A",
+            statut: res.status || "En attente",
+            prix: res.total_amount ? `${res.total_amount} DH` : "0 DH",
           })));
         }
       } catch (error) {
@@ -107,41 +107,36 @@ export default function ClientReservation() {
     const newReservation = {
       id: Date.now(),
       vehicule: selectedVehicule.libelle,
-      service: selectedService.nom,
+      service: selectedService.name,
       date: booking.date,
       heure: booking.heure,
       statut: "En attente",
-      prix: selectedService.prix_base || "0 DH"
+      prix: selectedService.price || "0 DH"
     };
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/reservations", {
-        method: "POST",
-        credentials: 'include',
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          service_id: booking.service_id,
-          vehicule_id: booking.vehicule_id,
-          date_debut: `${booking.date} ${booking.heure}`,
-          adresse: booking.adresse,
-          ville: booking.ville,
-          gps: booking.gps,
-          notes: booking.notes,
-        })
+      const result = await bookingsApi.create({
+        vehicle_id: booking.vehicule_id,
+        service_id: booking.service_id,
+        booking_date: booking.date,
+        booking_time: booking.heure,
+        notes: booking.notes,
       });
 
-      if (!response.ok) {
-        const errData = await response.json().catch(() => null);
-        setSubmitError(errData?.message || `Erreur API ${response.status}`);
-        return;
-      }
-
-      const result = await response.json();
-      const saved = result.reservation;
+      const saved = result.data.data;
       if (saved) {
-        setMesReservations([{ id: saved.id, vehicule: saved.vehicule?.libelle_complet || selectedVehicule.libelle, service: saved.service?.nom || selectedService.nom, date: saved.date_debut?.split(' ')[0] || booking.date, heure: saved.date_debut?.split(' ')[1] || booking.heure, statut: saved.statut || "En attente", prix: saved.prix_estime || selectedService.prix_base || "0 DH" }, ...mesReservations]);
+        setMesReservations([
+          {
+            id: saved.id,
+            vehicule: saved.vehicle?.plate_number || selectedVehicule.libelle,
+            service: saved.service?.name || selectedService.name,
+            date: saved.booking_date || booking.date,
+            heure: saved.booking_time || booking.heure,
+            statut: saved.status || "En attente",
+            prix: saved.total_amount ? `${saved.total_amount} DH` : selectedService.price || "0 DH",
+          },
+          ...mesReservations,
+        ]);
       } else {
         setMesReservations([newReservation, ...mesReservations]);
       }
@@ -236,11 +231,11 @@ export default function ClientReservation() {
                           onChange={() => setBooking({...booking, service_id: s.id})}
                         />
                         <div>
-                          <p className="text-sm font-semibold text-slate-800">{s.nom}</p>
-                          <p className="text-xs text-slate-400">Durée: {s.duree_estimee}</p>
+                          <p className="text-sm font-semibold text-slate-800">{s.name}</p>
+                          <p className="text-xs text-slate-400">Durée: {s.duration_minutes ?? "-"} min</p>
                         </div>
                       </div>
-                      <span className="text-base font-black text-blue-900">{s.prix_base}</span>
+                      <span className="text-base font-black text-blue-900">{s.price}</span>
                     </label>
                   ))}
                 </div>
@@ -361,7 +356,7 @@ export default function ClientReservation() {
                 </div>
                 <div className="flex justify-between border-b border-slate-200/50 pb-2">
                   <span className="text-slate-400">Prestation:</span>
-                  <span className="font-bold text-blue-900">{selectedService?.nom || "-"}</span>
+                  <span className="font-bold text-blue-900">{selectedService?.name || "-"}</span>
                 </div>
                 <div className="flex justify-between border-b border-slate-200/50 pb-2">
                   <span className="text-slate-400">Adresse:</span>
