@@ -221,7 +221,7 @@ export function HomePage() {
                   Booking & Management Platform for Car Wash Businesses
                 </Badge>
                 <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 leading-tight mb-6">
-                  Run Your Car Wash<br />
+                  Run Your Car Wash jkqckjqchqskjc<br />
                   <span className="text-blue-600">Like Clockwork</span>
                 </h1>
                 <p className="text-lg text-gray-600 mb-8 max-w-lg leading-relaxed">
