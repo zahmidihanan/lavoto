@@ -3,7 +3,7 @@ import type {
   ApiResponse, PaginatedResponse, PaginationParams,
   AuthResponse, User, Station, Service, Customer, Employee,
   Vehicle, Coupon, Booking, Payment, QualityCheck,
-  Notification, LoyaltyTransaction, DashboardData,
+  Notification, LoyaltyTransaction, DashboardData, Company,
 } from '@/types'
 
 // ─── Auth ────────────────────────────────────────────────────────────────────
@@ -65,6 +65,8 @@ export const customersApi = {
   list: (params?: PaginationParams) =>
     api.get<PaginatedResponse<Customer>>('/customers', { params }),
   get: (id: number) => api.get<ApiResponse<Customer>>(`/customers/${id}`),
+  create: (data: Record<string, unknown>) =>
+    api.post<ApiResponse<Customer>>('/customers', data),
   update: (id: number, data: Partial<Customer>) =>
     api.put<ApiResponse<Customer>>(`/customers/${id}`, data),
   delete: (id: number) => api.delete<ApiResponse<null>>(`/customers/${id}`),
@@ -109,6 +111,10 @@ export const bookingsApi = {
   get: (id: number) => api.get<ApiResponse<Booking>>(`/bookings/${id}`),
   create: (data: Record<string, unknown>) =>
     api.post<ApiResponse<Booking>>('/bookings', data),
+  availability: (params: { date: string; station_id: number }) =>
+    api.get<ApiResponse<{ full_slots: string[]; date: string }>>('/bookings/availability', { params }),
+  fullyBookedDates: (params: { station_id: number; from: string; to: string }) =>
+    api.get<ApiResponse<{ fully_booked_dates: string[] }>>('/bookings/fully-booked-dates', { params }),
   updateStatus: (id: number, data: { status: string; cancellation_reason?: string }) =>
     api.post<ApiResponse<Booking>>(`/bookings/${id}/status`, data),
   assignEmployees: (id: number, employee_ids: number[]) =>
@@ -125,7 +131,17 @@ export const paymentsApi = {
   get: (id: number) => api.get<ApiResponse<Payment>>(`/payments/${id}`),
   create: (data: Record<string, unknown>) =>
     api.post<ApiResponse<Payment>>('/payments', data),
+  update: (id: number, data: Record<string, unknown>) =>
+    api.put<ApiResponse<Payment>>(`/payments/${id}`, data),
+  delete: (id: number) => api.delete<ApiResponse<null>>(`/payments/${id}`),
   refund: (id: number) => api.post<ApiResponse<Payment>>(`/payments/${id}/refund`),
+  import: (file: File) => {
+    const fd = new FormData()
+    fd.append('file', file)
+    return api.post<ApiResponse<{ imported: number; errors: string[] }>>('/payments/import', fd)
+  },
+  exportWord: () =>
+    api.get('/payments/export/word', { responseType: 'blob' }),
 }
 
 // ─── Coupons ─────────────────────────────────────────────────────────────────
@@ -160,10 +176,10 @@ export const notificationsApi = {
     api.get<PaginatedResponse<Notification>>('/notifications', { params }),
   unreadCount: () =>
     api.get<ApiResponse<{ count: number }>>('/notifications/unread-count'),
-  markRead: (id: string) =>
+  markRead: (id: number) =>
     api.post<ApiResponse<null>>(`/notifications/${id}/mark-read`),
   markAllRead: () => api.post<ApiResponse<null>>('/notifications/mark-all-read'),
-  delete: (id: string) => api.delete<ApiResponse<null>>(`/notifications/${id}`),
+  delete: (id: number) => api.delete<ApiResponse<null>>(`/notifications/${id}`),
 }
 
 // ─── Users (Admin) ───────────────────────────────────────────────────────────
@@ -177,6 +193,15 @@ export const usersApi = {
   update: (id: number, data: Record<string, unknown>) =>
     api.put<ApiResponse<User>>(`/users/${id}`, data),
   delete: (id: number) => api.delete<ApiResponse<null>>(`/users/${id}`),
+}
+
+// ─── Company Settings (Admin) ────────────────────────────────────────────────
+
+export const companiesApi = {
+  getSettings: () =>
+    api.get<ApiResponse<Company>>('/company/settings'),
+  updateSettings: (data: { booking_url?: string }) =>
+    api.put<ApiResponse<Company>>('/company/settings', data),
 }
 
 // ─── Public Booking Portal (no auth) ─────────────────────────────────────────
@@ -207,8 +232,10 @@ export interface PublicBookingResult {
 }
 
 export const publicApi = {
+  companyDefault: () =>
+    api.get<ApiResponse<Company>>('/company'),
   company: (slug: string) =>
-    api.get<ApiResponse<{ id: number; name: string; slug: string }>>(`/public/${slug}`),
+    api.get<ApiResponse<Company>>(`/public/${slug}`),
   services: (slug: string) =>
     api.get<ApiResponse<Service[]>>(`/public/${slug}/services`),
   stations: (slug: string) =>

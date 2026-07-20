@@ -1,11 +1,12 @@
 import React, { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { Play, CheckCircle2, Car, MapPin, Clock } from 'lucide-react'
+import { Play, CheckCircle2, Car, MapPin, Clock, DollarSign } from 'lucide-react'
 import { PageHeader } from '@/components/shared/PageHeader'
 import { BookingStatusBadge } from '@/components/shared/BookingStatusBadge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { PaymentDialog } from '@/components/shared/PaymentDialog'
 import { bookingsApi } from '@/api/services'
 import type { Booking } from '@/types'
 import { cn } from '@/utils/cn'
@@ -26,6 +27,7 @@ export function EmployeeBookings() {
       toast.success(vars.status === 'in_progress' ? 'Job started!' : 'Job completed!')
       qc.invalidateQueries({ queryKey: ['employee-bookings-list'] })
       qc.invalidateQueries({ queryKey: ['employee-bookings'] })
+      qc.invalidateQueries({ queryKey: ['dashboard'] })
     },
     onError: (err: unknown) => {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
@@ -150,7 +152,7 @@ function JobCard({
           </div>
 
           {onAction && (
-            <div className="shrink-0">
+            <div className="shrink-0 flex items-center gap-2">
               {isAssigned && (
                 <Button
                   size="sm"
@@ -162,14 +164,26 @@ function JobCard({
                 </Button>
               )}
               {isInProgress && (
-                <Button
-                  size="sm"
-                  onClick={() => onAction('completed')}
-                  loading={isPending}
-                  className="bg-emerald-600 hover:bg-emerald-700 gap-1.5"
-                >
-                  <CheckCircle2 className="h-3.5 w-3.5" /> Finish
-                </Button>
+                <>
+                  <PaymentDialog booking={booking}>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="gap-1.5 text-emerald-600 border-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/30"
+                      disabled={booking.payment?.payment_status === 'paid' || booking.payment?.payment_status === 'refunded'}
+                    >
+                      <DollarSign className="h-3.5 w-3.5" /> Pay
+                    </Button>
+                  </PaymentDialog>
+                  <Button
+                    size="sm"
+                    onClick={() => onAction('completed')}
+                    loading={isPending}
+                    className="bg-emerald-600 hover:bg-emerald-700 gap-1.5"
+                  >
+                    <CheckCircle2 className="h-3.5 w-3.5" /> Finish
+                  </Button>
+                </>
               )}
             </div>
           )}

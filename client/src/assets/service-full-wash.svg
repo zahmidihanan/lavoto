@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" fill="none">
+  <defs>
+    <linearGradient id="bg1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2563EB"/>
+      <stop offset="100%" stop-color="#1D4ED8"/>
+    </linearGradient>
+    <linearGradient id="car1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#60A5FA"/>
+      <stop offset="100%" stop-color="#3B82F6"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#bg1)"/>
+  <ellipse cx="200" cy="270" rx="140" ry="12" fill="#1E3A5F" opacity="0.4"/>
+  <g transform="translate(100, 170)">
+    <rect x="10" y="40" width="200" height="55" rx="10" fill="url(#car1)" stroke="#1E40AF" stroke-width="1.5"/>
+    <path d="M60 40 L75 10 L145 10 L155 40 Z" fill="#1E3A5F"/>
+    <path d="M78 15 L95 38 L135 38 L135 15 Z" fill="#BFDBFE" opacity="0.8"/>
+    <path d="M138 15 L138 38 L150 38 L145 15 Z" fill="#BFDBFE" opacity="0.6"/>
+    <circle cx="55" cy="95" r="18" fill="#1F2937"/>
+    <circle cx="55" cy="95" r="9" fill="#4B5563"/>
+    <circle cx="55" cy="95" r="4" fill="#9CA3AF"/>
+    <circle cx="165" cy="95" r="18" fill="#1F2937"/>
+    <circle cx="165" cy="95" r="9" fill="#4B5563"/>
+    <circle cx="165" cy="95" r="4" fill="#9CA3AF"/>
+    <rect x="205" y="55" width="8" height="10" rx="2" fill="#FEF08A"/>
+    <rect x="3" y="55" width="7" height="10" rx="2" fill="#EF4444"/>
+  </g>
+  <g fill="#93C5FD" opacity="0.7">
+    <circle cx="160" cy="200" r="10"/>
+    <circle cx="180" cy="190" r="8"/>
+    <circle cx="200" cy="205" r="12"/>
+    <circle cx="220" cy="195" r="9"/>
+    <circle cx="240" cy="210" r="11"/>
+    <circle cx="145" cy="215" r="8"/>
+    <circle cx="255" cy="220" r="7"/>
+  </g>
+  <g fill="#FEF08A" opacity="0.6">
+    <path d="M300 80 L303 73 L306 80 L313 83 L306 86 L303 93 L300 86 L293 83Z"/>
+    <path d="M80 100 L82 95 L84 100 L89 102 L84 104 L82 109 L80 104 L75 102Z"/>
+  </g>
+</svg>

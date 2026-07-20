@@ -33,7 +33,7 @@ export function CustomerBookings() {
       cell: (b) => b.vehicle ? `${b.vehicle.brand} ${b.vehicle.model}` : '—',
     },
     { key: 'status', header: 'Status', cell: (b) => <BookingStatusBadge status={b.status} /> },
-    { key: 'amount', header: 'Total', cell: (b) => <span className="font-semibold">${b.total_amount}</span> },
+    { key: 'amount', header: 'Total', cell: (b) => <span className="font-semibold">MAD {b.total_amount}</span> },
     {
       key: 'actions', header: '',
       cell: (b) => (

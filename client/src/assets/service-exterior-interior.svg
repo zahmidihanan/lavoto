@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" fill="none">
+  <defs>
+    <linearGradient id="bg3" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#047857"/>
+    </linearGradient>
+    <linearGradient id="car3" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#34D399"/>
+      <stop offset="100%" stop-color="#10B981"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#bg3)"/>
+  <ellipse cx="200" cy="270" rx="140" ry="12" fill="#064E3B" opacity="0.4"/>
+  <g transform="translate(100, 180)">
+    <rect x="10" y="40" width="200" height="55" rx="10" fill="url(#car3)" stroke="#047857" stroke-width="1.5"/>
+    <path d="M60 40 L75 10 L145 10 L155 40 Z" fill="#064E3B"/>
+    <path d="M78 15 L95 38 L135 38 L135 15 Z" fill="#A7F3D0" opacity="0.8"/>
+    <path d="M138 15 L138 38 L150 38 L145 15 Z" fill="#A7F3D0" opacity="0.6"/>
+    <circle cx="55" cy="95" r="18" fill="#1F2937"/>
+    <circle cx="55" cy="95" r="9" fill="#4B5563"/>
+    <circle cx="55" cy="95" r="4" fill="#9CA3AF"/>
+    <circle cx="165" cy="95" r="18" fill="#1F2937"/>
+    <circle cx="165" cy="95" r="9" fill="#4B5563"/>
+    <circle cx="165" cy="95" r="4" fill="#9CA3AF"/>
+    <rect x="205" y="55" width="8" height="10" rx="2" fill="#FEF08A"/>
+    <rect x="3" y="55" width="7" height="10" rx="2" fill="#EF4444"/>
+  </g>
+  <!-- Interior cleaning icon -->
+  <g transform="translate(140, 60)" fill="#A7F3D0" opacity="0.7">
+    <rect x="0" y="0" width="40" height="25" rx="3" fill="none" stroke="#A7F3D0" stroke-width="1.5"/>
+    <rect x="5" y="4" width="12" height="8" rx="1" fill="#A7F3D0" opacity="0.5"/>
+    <rect x="20" y="4" width="12" height="8" rx="1" fill="#A7F3D0" opacity="0.5"/>
+    <line x1="10" y1="16" x2="10" y2="22" stroke="#A7F3D0" stroke-width="1"/>
+    <line x1="30" y1="16" x2="30" y2="22" stroke="#A7F3D0" stroke-width="1"/>
+  </g>
+  <!-- Sparkle -->
+  <g fill="#FEF08A" opacity="0.7">
+    <path d="M330 80 L333 73 L336 80 L343 83 L336 86 L333 93 L330 86 L323 83Z"/>
+    <path d="M60 90 L62 85 L64 90 L69 92 L64 94 L62 99 L60 94 L55 92Z"/>
+    <path d="M350 140 L352 136 L354 140 L358 142 L354 144 L352 148 L350 144 L346 142Z"/>
+  </g>
+</svg>

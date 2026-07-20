@@ -74,7 +74,7 @@ export function CustomerLoyalty() {
               Redeem
             </Button>
           </div>
-          <p className="text-xs text-muted-foreground mt-2">1 point = $0.01 discount on your next booking</p>
+          <p className="text-xs text-muted-foreground mt-2">1 point = MAD 0.01 discount on your next booking</p>
         </CardContent>
       </Card>
 

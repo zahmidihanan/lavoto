@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" fill="none">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1E40AF"/>
+      <stop offset="100%" stop-color="#3B82F6"/>
+    </linearGradient>
+    <linearGradient id="carBody" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#60A5FA"/>
+      <stop offset="100%" stop-color="#2563EB"/>
+    </linearGradient>
+    <linearGradient id="foam" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0%" stop-color="#DBEAFE" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#EFF6FF" stop-opacity="0.4"/>
+    </linearGradient>
+  </defs>
+  <!-- Sky -->
+  <rect width="800" height="600" fill="url(#sky)"/>
+  <!-- Ground -->
+  <rect x="0" y="460" width="800" height="140" fill="#1E3A5F"/>
+  <rect x="0" y="460" width="800" height="4" fill="#3B82F6" opacity="0.5"/>
+  <!-- Water on ground -->
+  <ellipse cx="400" cy="470" rx="300" ry="20" fill="#3B82F6" opacity="0.15"/>
+  <!-- Sun -->
+  <circle cx="680" cy="80" r="45" fill="#FBBF24" opacity="0.9"/>
+  <circle cx="680" cy="80" r="55" fill="#FBBF24" opacity="0.2"/>
+  <circle cx="680" cy="80" r="65" fill="#FBBF24" opacity="0.1"/>
+  <!-- Clouds -->
+  <g fill="white" opacity="0.3">
+    <ellipse cx="150" cy="70" rx="60" ry="20"/>
+    <ellipse cx="130" cy="65" rx="30" ry="18"/>
+    <ellipse cx="170" cy="63" rx="35" ry="16"/>
+    <ellipse cx="500" cy="100" rx="50" ry="16"/>
+    <ellipse cx="485" cy="95" rx="25" ry="14"/>
+    <ellipse cx="520" cy="93" rx="30" ry="12"/>
+  </g>
+  <!-- Car Shadow -->
+  <ellipse cx="380" cy="465" rx="160" ry="18" fill="#1E3A5F" opacity="0.6"/>
+  <!-- Car Body -->
+  <g transform="translate(220, 280)">
+    <!-- Car body lower -->
+    <rect x="10" y="80" width="340" height="90" rx="15" fill="url(#carBody)" stroke="#1E40AF" stroke-width="2"/>
+    <!-- Car roof and windows -->
+    <path d="M80 80 L100 20 L260 20 L290 80 Z" fill="#1E3A5F" rx="10"/>
+    <!-- Windshield -->
+    <path d="M100 25 L130 75 L200 75 L200 25 Z" fill="#BFDBFE" opacity="0.8"/>
+    <path d="M205 25 L205 75 L275 75 L255 25 Z" fill="#BFDBFE" opacity="0.6"/>
+    <!-- Car top highlight -->
+    <path d="M100 20 L260 20 L255 15 L105 15 Z" fill="#60A5FA" opacity="0.5"/>
+    <!-- Wheels -->
+    <circle cx="85" cy="170" r="30" fill="#1F2937" stroke="#374151" stroke-width="4"/>
+    <circle cx="85" cy="170" r="14" fill="#4B5563"/>
+    <circle cx="85" cy="170" r="6" fill="#9CA3AF"/>
+    <circle cx="285" cy="170" r="30" fill="#1F2937" stroke="#374151" stroke-width="4"/>
+    <circle cx="285" cy="170" r="14" fill="#4B5563"/>
+    <circle cx="285" cy="170" r="6" fill="#9CA3AF"/>
+    <!-- Headlight -->
+    <rect x="345" y="95" width="12" height="15" rx="3" fill="#FEF08A"/>
+    <rect x="345" y="95" width="6" height="15" rx="3" fill="#FEF9C3" opacity="0.6"/>
+    <!-- Taillight -->
+    <rect x="5" y="95" width="10" height="15" rx="3" fill="#EF4444"/>
+    <!-- Door line -->
+    <line x1="200" y1="85" x2="200" y2="165" stroke="#1E40AF" stroke-width="1.5" opacity="0.3"/>
+    <!-- Handle -->
+    <rect x="210" y="105" width="20" height="5" rx="2" fill="#93C5FD" opacity="0.6"/>
+    <rect x="155" y="105" width="20" height="5" rx="2" fill="#93C5FD" opacity="0.6"/>
+  </g>
+  <!-- Foam / Suds on car -->
+  <g fill="url(#foam)">
+    <circle cx="280" cy="310" r="18"/>
+    <circle cx="310" cy="300" r="14"/>
+    <circle cx="340" cy="315" r="16"/>
+    <circle cx="370" cy="305" r="12"/>
+    <circle cx="400" cy="320" r="15"/>
+    <circle cx="430" cy="310" r="13"/>
+    <circle cx="260" cy="330" r="12"/>
+    <circle cx="450" cy="335" r="10"/>
+    <circle cx="300" cy="340" r="11"/>
+    <circle cx="350" cy="350" r="9"/>
+    <circle cx="400" cy="345" r="13"/>
+    <circle cx="240" cy="345" r="8"/>
+  </g>
+  <!-- Water drops -->
+  <g fill="#93C5FD" opacity="0.6">
+    <path d="M230 290 Q232 280 234 290 Q232 295 230 290Z"/>
+    <path d="M480 300 Q482 290 484 300 Q482 305 480 300Z"/>
+    <path d="M200 320 Q202 310 204 320 Q202 325 200 320Z"/>
+    <path d="M500 330 Q502 320 504 330 Q502 335 500 330Z"/>
+  </g>
+  <!-- Water splashes -->
+  <g stroke="#93C5FD" stroke-width="1.5" fill="none" opacity="0.5">
+    <path d="M240 395 Q235 385 240 375"/>
+    <path d="M260 400 Q265 390 260 380"/>
+    <path d="M480 395 Q485 385 480 375"/>
+    <path d="M500 400 Q495 390 500 380"/>
+  </g>
+  <!-- Sparkles -->
+  <g fill="#FEF08A" opacity="0.7">
+    <path d="M550 180 L555 170 L560 180 L570 185 L560 190 L555 200 L550 190 L540 185Z"/>
+    <path d="M150 200 L153 193 L156 200 L163 203 L156 206 L153 213 L150 206 L143 203Z"/>
+    <path d="M600 250 L603 243 L606 250 L613 253 L606 256 L603 263 L600 256 L593 253Z"/>
+  </g>
+  <!-- Brush icon top-right -->
+  <g transform="translate(620, 380)" opacity="0.2">
+    <rect x="0" y="0" width="8" height="40" rx="3" fill="#FBBF24"/>
+    <rect x="-8" y="40" width="24" height="12" rx="2" fill="#60A5FA"/>
+    <rect x="-8" y="40" width="24" height="4" rx="1" fill="#93C5FD"/>
+  </g>
+  <!-- Badge text area -->
+  <rect x="60" y="490" width="200" height="40" rx="20" fill="white" opacity="0.15"/>
+  <rect x="60" y="490" width="200" height="40" rx="20" fill="white" opacity="0.08"/>
+</svg>

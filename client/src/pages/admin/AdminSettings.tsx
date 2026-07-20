@@ -2,7 +2,7 @@ import React from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { PageHeader } from '@/components/shared/PageHeader'
 import { FormField } from '@/components/shared/FormField'
@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
-import { authApi } from '@/api/services'
+import { authApi, companiesApi } from '@/api/services'
 import { useAuthStore } from '@/stores/auth.store'
 import { useThemeStore } from '@/stores/theme.store'
 import { Switch } from '@/components/ui/switch'
@@ -76,6 +76,13 @@ export function AdminSettings() {
       </Card>
 
       <Card>
+        <CardHeader><CardTitle>Company Settings</CardTitle></CardHeader>
+        <CardContent>
+          <CompanyBookingUrl />
+        </CardContent>
+      </Card>
+
+      <Card>
         <CardHeader><CardTitle>Appearance</CardTitle></CardHeader>
         <CardContent>
           <div className="flex items-center justify-between">
@@ -87,6 +94,52 @@ export function AdminSettings() {
           </div>
         </CardContent>
       </Card>
+    </div>
+  )
+}
+
+function CompanyBookingUrl() {
+  const { data: company, isLoading } = useQuery({
+    queryKey: ['company-settings'],
+    queryFn: () => companiesApi.getSettings().then((r) => r.data.data),
+  })
+
+  const [bookingUrl, setBookingUrl] = React.useState('')
+
+  React.useEffect(() => {
+    if (company) setBookingUrl(company.booking_url ?? '')
+  }, [company])
+
+  const updateUrl = useMutation({
+    mutationFn: (data: { booking_url: string }) => companiesApi.updateSettings(data),
+    onSuccess: () => toast.success('Booking URL updated'),
+    onError: () => toast.error('Failed to update'),
+  })
+
+  return (
+    <div className="space-y-4">
+      <FormField
+        label="Booking Page URL"
+        hint="Set the URL for the 'Book Now' button on the landing page. Leave empty to use the default booking portal."
+      >
+        <Input
+          value={bookingUrl}
+          onChange={(e) => setBookingUrl(e.target.value)}
+          placeholder="/book/lavoto or https://..."
+        />
+      </FormField>
+      <Button
+        onClick={() => updateUrl.mutate({ booking_url: bookingUrl })}
+        loading={updateUrl.isPending}
+        disabled={isLoading}
+      >
+        Save Booking URL
+      </Button>
+      {company?.booking_url && (
+        <p className="text-xs text-green-600">
+          Current booking URL: {company.booking_url}
+        </p>
+      )}
     </div>
   )
 }

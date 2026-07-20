@@ -1,24 +1,60 @@
 import React, { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { Trash2, Eye } from 'lucide-react'
+import { Plus, Trash2, Eye } from 'lucide-react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
 import { DataTable, type Column } from '@/components/shared/DataTable'
 import { PageHeader } from '@/components/shared/PageHeader'
+import { FormField } from '@/components/shared/FormField'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+} from '@/components/ui/dialog'
 import { customersApi } from '@/api/services'
 import type { Customer } from '@/types'
 import { useNavigate } from 'react-router-dom'
 
+const schema = z.object({
+  name: z.string().min(2, 'Name is required'),
+  email: z.string().email('Invalid email'),
+  phone: z.string().optional(),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+})
+type FormData = z.infer<typeof schema>
+
 export function AdminCustomers() {
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
+  const [open, setOpen] = useState(false)
   const qc = useQueryClient()
   const navigate = useNavigate()
 
   const { data, isLoading } = useQuery({
     queryKey: ['customers', page, search],
     queryFn: () => customersApi.list({ page, search, per_page: 15 }).then((r) => r.data),
+  })
+
+  const { register, handleSubmit, reset, formState: { errors } } = useForm<FormData>({
+    resolver: zodResolver(schema),
+    defaultValues: { name: '', email: '', phone: '', password: '' },
+  })
+
+  const createMutation = useMutation({
+    mutationFn: (d: FormData) => customersApi.create(d as Record<string, unknown>),
+    onSuccess: () => {
+      toast.success('Customer created')
+      qc.invalidateQueries({ queryKey: ['customers'] })
+      setOpen(false)
+      reset()
+    },
+    onError: (err: unknown) => {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
+      toast.error(msg ?? 'Failed to create customer')
+    },
   })
 
   const deleteMutation = useMutation({
@@ -89,7 +125,11 @@ export function AdminCustomers() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Customers" description={`${data?.meta.total ?? 0} total customers`} />
+      <PageHeader
+        title="Customers"
+        description={`${data?.meta.total ?? 0} total customers`}
+        actions={<Button onClick={() => { reset(); setOpen(true) }}><Plus className="h-4 w-4 mr-1" />New Customer</Button>}
+      />
       <DataTable
         data={data?.data ?? []}
         columns={columns}
@@ -102,6 +142,30 @@ export function AdminCustomers() {
         onSearch={setSearch}
         searchPlaceholder="Search customers…"
       />
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>New Customer</DialogTitle></DialogHeader>
+          <form onSubmit={handleSubmit((d) => createMutation.mutate(d))} className="space-y-4">
+            <FormField label="Name" error={errors.name?.message} required>
+              <Input {...register('name')} />
+            </FormField>
+            <FormField label="Email" error={errors.email?.message} required>
+              <Input {...register('email')} type="email" />
+            </FormField>
+            <FormField label="Phone" error={errors.phone?.message}>
+              <Input {...register('phone')} />
+            </FormField>
+            <FormField label="Password" error={errors.password?.message} required>
+              <Input {...register('password')} type="password" />
+            </FormField>
+            <DialogFooter>
+              <Button variant="outline" type="button" onClick={() => setOpen(false)}>Cancel</Button>
+              <Button type="submit" loading={createMutation.isPending}>Create</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

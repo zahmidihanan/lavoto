@@ -90,7 +90,7 @@ export function AdminCoupons() {
       key: 'type', header: 'Discount',
       cell: (c) => (
         <span className="font-semibold">
-          {c.type === 'percentage' ? `${c.value}%` : `$${c.value}`}
+          {c.type === 'percentage' ? `${c.value}%` : `MAD ${c.value}`}
         </span>
       ),
     },
@@ -155,17 +155,17 @@ export function AdminCoupons() {
                 <Select value={type} onValueChange={(v) => setValue('type', v as 'fixed' | 'percentage')}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="fixed">Fixed ($)</SelectItem>
+                    <SelectItem value="fixed">Fixed (MAD)</SelectItem>
                     <SelectItem value="percentage">Percentage (%)</SelectItem>
                   </SelectContent>
                 </Select>
               </FormField>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <FormField label={type === 'percentage' ? 'Value (%)' : 'Value ($)'} error={errors.value?.message} required>
+              <FormField label={type === 'percentage' ? 'Value (%)' : 'Value (MAD)'} error={errors.value?.message} required>
                 <Input type="number" step="0.01" {...register('value')} />
               </FormField>
-              <FormField label="Min Amount ($)" error={errors.min_amount?.message}>
+              <FormField label="Min Amount (MAD)" error={errors.min_amount?.message}>
                 <Input type="number" step="0.01" {...register('min_amount')} />
               </FormField>
             </div>

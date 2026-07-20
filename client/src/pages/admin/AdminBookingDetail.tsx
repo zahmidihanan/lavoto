@@ -195,11 +195,11 @@ export function AdminBookingDetail() {
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Total</span>
-              <span className="font-bold text-base">${booking.total_amount}</span>
+              <span className="font-bold text-base">MAD {booking.total_amount}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Discount</span>
-              <span className="text-emerald-600">-${booking.discount_amount}</span>
+              <span className="text-emerald-600">-MAD {booking.discount_amount}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Payment</span>

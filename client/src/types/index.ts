@@ -30,6 +30,7 @@ export interface Company {
   id: number
   name: string
   slug: string
+  booking_url?: string
   status: string
   created_at: string
 }
@@ -52,9 +53,11 @@ export interface Station {
 export interface Service {
   id: number
   name: string
+  category?: 'full' | 'interior' | 'exterior' | 'premium'
   description?: string
   price: string
   duration_minutes: number
+  options?: string[]
   is_active: boolean
   company_id: number
   created_at: string
@@ -161,7 +164,7 @@ export interface Payment {
   id: number
   booking_id: number
   amount: string
-  payment_method: 'cash' | 'card' | 'transfer' | 'online'
+  payment_method: 'cash' | 'card' | 'transfer' | 'wallet'
   payment_status: 'pending' | 'paid' | 'refunded' | 'failed'
   transaction_reference?: string
   notes?: string
@@ -186,7 +189,7 @@ export interface QualityCheck {
 // ─── Notification ────────────────────────────────────────────────────────────
 
 export interface Notification {
-  id: string
+  id: number
   title: string
   body: string
   type: string

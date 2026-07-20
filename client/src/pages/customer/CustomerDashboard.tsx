@@ -106,7 +106,7 @@ export function CustomerDashboard() {
                     <p className="text-xs text-muted-foreground">{b.booking_date} · {b.station?.name}</p>
                   </div>
                   <BookingStatusBadge status={b.status} />
-                  <span className="font-semibold">${b.total_amount}</span>
+                  <span className="font-semibold">MAD {b.total_amount}</span>
                 </div>
               ))}
             </div>

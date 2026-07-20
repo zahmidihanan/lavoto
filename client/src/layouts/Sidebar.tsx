@@ -42,9 +42,10 @@ const customerNav: NavItem[] = [
 ]
 
 const employeeNav: NavItem[] = [
-  { label: 'Dashboard',   href: '/employee',              icon: <LayoutDashboard className="h-4 w-4" /> },
-  { label: 'Bookings',    href: '/employee/bookings',     icon: <CalendarCheck className="h-4 w-4" /> },
-  { label: 'Profile',     href: '/employee/profile',      icon: <Settings className="h-4 w-4" /> },
+  { label: 'Dashboard',     href: '/employee',              icon: <LayoutDashboard className="h-4 w-4" /> },
+  { label: 'Bookings',      href: '/employee/bookings',     icon: <CalendarCheck className="h-4 w-4" /> },
+  { label: 'Notifications', href: '/employee/notifications',icon: <Bell className="h-4 w-4" /> },
+  { label: 'Profile',       href: '/employee/profile',      icon: <Settings className="h-4 w-4" /> },
 ]
 
 interface SidebarProps {

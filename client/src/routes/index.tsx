@@ -12,6 +12,7 @@ import { RegisterPage } from '@/pages/auth/RegisterPage'
 import { ForgotPasswordPage } from '@/pages/auth/ForgotPasswordPage'
 import { ResetPasswordPage } from '@/pages/auth/ResetPasswordPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
+import { UnauthorizedPage } from '@/pages/UnauthorizedPage'
 
 // Admin
 import { AdminDashboard } from '@/pages/admin/AdminDashboard'
@@ -45,7 +46,7 @@ import { EmployeeProfile } from '@/pages/employee/EmployeeProfile'
 const router = createBrowserRouter([
   // ── Public ────────────────────────────────────────────────────────────────
   { path: '/', element: <HomePage /> },
-  { path: '/unauthorized', element: <div className="min-h-screen flex items-center justify-center"><p className="text-lg font-medium text-muted-foreground">Access denied.</p></div> },
+  { path: '/unauthorized', element: <UnauthorizedPage /> },
   { path: '/book/:slug', element: <BookingPortal /> },
 
   // ── Auth (public-only) ────────────────────────────────────────────────────
@@ -130,6 +131,7 @@ const router = createBrowserRouter([
             children: [
               { path: '/employee', element: <EmployeeDashboard /> },
               { path: '/employee/bookings', element: <EmployeeBookings /> },
+              { path: '/employee/notifications', element: <AdminNotifications /> },
               { path: '/employee/profile', element: <EmployeeProfile /> },
             ],
           },

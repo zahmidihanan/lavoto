@@ -17,6 +17,7 @@ export function AdminReports() {
   const { data } = useQuery({
     queryKey: ['dashboard', period],
     queryFn: () => dashboardApi.get(period).then((r) => r.data.data),
+    refetchInterval: 30_000,
   })
 
   const barData = data
@@ -48,7 +49,7 @@ export function AdminReports() {
       />
 
       <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
-        <StatCard title="Revenue" value={`$${(data?.revenue.total ?? 0).toLocaleString()}`} icon={<DollarSign className="h-5 w-5" />} color="green" />
+        <StatCard title="Revenue" value={`MAD ${(data?.revenue.total ?? 0).toLocaleString()}`} icon={<DollarSign className="h-5 w-5" />} color="green" />
         <StatCard title="Customers" value={data?.total_customers ?? 0} icon={<Users className="h-5 w-5" />} color="blue" />
         <StatCard title="Employees" value={data?.total_employees ?? 0} icon={<Users className="h-5 w-5" />} color="purple" />
         <StatCard title="Completed" value={data?.bookings_by_status.completed ?? 0} icon={<CheckCircle className="h-5 w-5" />} color="green" />

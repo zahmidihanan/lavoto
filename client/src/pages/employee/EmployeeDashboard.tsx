@@ -1,13 +1,14 @@
 import React from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
-import { CalendarCheck, CheckCircle2, Clock, Play, Car } from 'lucide-react'
+import { CalendarCheck, CheckCircle2, Clock, Play, Car, DollarSign } from 'lucide-react'
 import { toast } from 'sonner'
 import { StatCard } from '@/components/shared/StatCard'
 import { PageHeader } from '@/components/shared/PageHeader'
 import { BookingStatusBadge } from '@/components/shared/BookingStatusBadge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { PaymentDialog } from '@/components/shared/PaymentDialog'
 import { bookingsApi } from '@/api/services'
 import { useAuthStore } from '@/stores/auth.store'
 import { cn } from '@/utils/cn'
@@ -28,6 +29,7 @@ export function EmployeeDashboard() {
       toast.success(vars.status === 'in_progress' ? 'Job started!' : 'Job marked as complete!')
       qc.invalidateQueries({ queryKey: ['employee-bookings'] })
       qc.invalidateQueries({ queryKey: ['employee-bookings-list'] })
+      qc.invalidateQueries({ queryKey: ['dashboard'] })
     },
     onError: (err: unknown) => {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
@@ -85,7 +87,7 @@ export function EmployeeDashboard() {
                   )}
                 </div>
               </div>
-              <div className="shrink-0">
+              <div className="shrink-0 flex items-center gap-2">
                 {b.status === 'assigned' && (
                   <Button
                     size="sm"
@@ -96,13 +98,25 @@ export function EmployeeDashboard() {
                   </Button>
                 )}
                 {b.status === 'in_progress' && (
-                  <Button
-                    size="sm"
-                    className="bg-emerald-600 hover:bg-emerald-700 gap-1.5"
-                    onClick={() => updateStatus.mutate({ id: b.id, status: 'completed' })}
-                  >
-                    <CheckCircle2 className="h-3.5 w-3.5" /> Finish
-                  </Button>
+                  <>
+                    <PaymentDialog booking={b}>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="gap-1.5 text-emerald-600 border-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/30"
+                        disabled={b.payment?.payment_status === 'paid' || b.payment?.payment_status === 'refunded'}
+                      >
+                        <DollarSign className="h-3.5 w-3.5" /> Pay
+                      </Button>
+                    </PaymentDialog>
+                    <Button
+                      size="sm"
+                      className="bg-emerald-600 hover:bg-emerald-700 gap-1.5"
+                      onClick={() => updateStatus.mutate({ id: b.id, status: 'completed' })}
+                    >
+                      <CheckCircle2 className="h-3.5 w-3.5" /> Finish
+                    </Button>
+                  </>
                 )}
               </div>
             </div>

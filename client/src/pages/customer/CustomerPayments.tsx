@@ -21,7 +21,7 @@ export function CustomerPayments() {
   const columns: Column<Payment>[] = [
     { key: 'id', header: '#', cell: (p) => <span className="font-mono text-xs text-muted-foreground">#{p.id}</span> },
     { key: 'booking', header: 'Booking', cell: (p) => <span className="font-mono text-xs">#{p.booking_id}</span> },
-    { key: 'amount', header: 'Amount', cell: (p) => <span className="font-bold">${p.amount}</span> },
+    { key: 'amount', header: 'Amount', cell: (p) => <span className="font-bold">MAD {p.amount}</span> },
     { key: 'method', header: 'Method', cell: (p) => <Badge variant="secondary" className="capitalize">{p.payment_method}</Badge> },
     { key: 'status', header: 'Status', cell: (p) => <Badge variant={statusVariant[p.payment_status] ?? 'secondary'}>{p.payment_status}</Badge> },
     { key: 'date', header: 'Date', cell: (p) => p.paid_at?.slice(0, 10) ?? '—' },

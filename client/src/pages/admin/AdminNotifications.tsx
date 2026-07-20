@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { Bell, Check, CheckCheck, Trash2 } from 'lucide-react'
 import { PageHeader } from '@/components/shared/PageHeader'
@@ -7,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { notificationsApi } from '@/api/services'
+import { useAuthStore } from '@/stores/auth.store'
 import type { Notification } from '@/types'
 import { cn } from '@/utils/cn'
 import { formatDistanceToNow } from 'date-fns'
@@ -14,31 +16,49 @@ import { formatDistanceToNow } from 'date-fns'
 export function AdminNotifications() {
   const [page, setPage] = useState(1)
   const qc = useQueryClient()
+  const navigate = useNavigate()
+  const { role } = useAuthStore()
 
   const { data, isLoading } = useQuery({
     queryKey: ['notifications', page],
     queryFn: () => notificationsApi.list({ page }).then((r) => r.data),
   })
 
+  const invalidate = () => {
+    qc.invalidateQueries({ queryKey: ['notifications'] })
+    qc.invalidateQueries({ queryKey: ['notifications-unread'] })
+  }
+
   const markRead = useMutation({
-    mutationFn: (id: string) => notificationsApi.markRead(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['notifications'] }),
+    mutationFn: (id: number) => notificationsApi.markRead(id),
+    onSuccess: invalidate,
   })
 
   const markAll = useMutation({
     mutationFn: () => notificationsApi.markAllRead(),
     onSuccess: () => {
       toast.success('All notifications marked as read')
-      qc.invalidateQueries({ queryKey: ['notifications'] })
+      invalidate()
     },
   })
 
   const deleteNotif = useMutation({
-    mutationFn: (id: string) => notificationsApi.delete(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['notifications'] }),
+    mutationFn: (id: number) => notificationsApi.delete(id),
+    onSuccess: invalidate,
   })
 
   const unread = data?.data.filter((n) => !n.is_read).length ?? 0
+
+  const handleNav = (n: Notification) => {
+    const d = (n.data ?? {}) as Record<string, unknown>
+    if (d.booking_id) {
+      const prefix = role === 'admin' || role === 'manager' ? 'admin' : 'employee'
+      navigate(`/${prefix}/bookings/${d.booking_id}`)
+    } else if (d.payment_id) {
+      const prefix = role === 'admin' || role === 'manager' ? 'admin' : 'employee'
+      navigate(`/${prefix}/payments`)
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -78,8 +98,9 @@ export function AdminNotifications() {
             {data?.data.map((n) => (
               <div
                 key={n.id}
+                onClick={() => handleNav(n)}
                 className={cn(
-                  'flex items-start gap-4 p-4 transition-colors',
+                  'flex items-start gap-4 p-4 transition-colors cursor-pointer',
                   !n.is_read && 'bg-primary/5'
                 )}
               >
@@ -101,7 +122,7 @@ export function AdminNotifications() {
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
                   {!n.is_read && (
-                    <Button variant="ghost" size="icon" onClick={() => markRead.mutate(n.id)} title="Mark read">
+                    <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); markRead.mutate(n.id) }} title="Mark read">
                       <Check className="h-4 w-4" />
                     </Button>
                   )}
@@ -109,7 +130,7 @@ export function AdminNotifications() {
                     variant="ghost"
                     size="icon"
                     className="text-muted-foreground hover:text-destructive"
-                    onClick={() => deleteNotif.mutate(n.id)}
+                    onClick={(e) => { e.stopPropagation(); deleteNotif.mutate(n.id) }}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>

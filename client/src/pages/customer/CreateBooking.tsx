@@ -1,11 +1,12 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { useForm, type Resolver } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
-import { ArrowLeft, Tag, X } from 'lucide-react'
+import { addDays, format } from 'date-fns'
+import { ArrowLeft, Tag, X, CalendarX, Clock } from 'lucide-react'
 import { PageHeader } from '@/components/shared/PageHeader'
 import { FormField } from '@/components/shared/FormField'
 import { Button } from '@/components/ui/button'
@@ -14,7 +15,18 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { DatePicker } from '@/components/shared/DatePicker'
+import { cn } from '@/utils/cn'
 import { servicesApi, vehiclesApi, stationsApi, bookingsApi, couponsApi } from '@/api/services'
+
+const TIME_SLOTS = Array.from({ length: 20 }, (_, i) => {
+  const totalMins = 8 * 60 + i * 30
+  const h = Math.floor(totalMins / 60)
+  const m = totalMins % 60
+  const label = `${h % 12 === 0 ? 12 : h % 12}:${m.toString().padStart(2, '0')} ${h < 12 ? 'AM' : 'PM'}`
+  const value = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`
+  return { label, value }
+})
 
 const schema = z.object({
   vehicle_id: z.coerce.number().min(1, 'Select a vehicle'),
@@ -55,12 +67,56 @@ export function CreateBooking() {
   const basePrice = parseFloat(selectedService?.price ?? '0')
   const finalPrice = discount !== null ? Math.max(0, basePrice - discount) : basePrice
 
+  const stationId = watch('station_id')
+  const bookingDate = watch('booking_date')
+
+  const dateRange = useMemo(() => {
+    const from = format(new Date(), 'yyyy-MM-dd')
+    const to = format(addDays(new Date(), 60), 'yyyy-MM-dd')
+    return { from, to }
+  }, [])
+
+  const { data: fullyBookedData } = useQuery({
+    queryKey: ['fully-booked-dates', stationId, dateRange],
+    queryFn: () =>
+      bookingsApi.fullyBookedDates({ station_id: Number(stationId), from: dateRange.from, to: dateRange.to }).then((r) => r.data.data),
+    enabled: !!stationId,
+  })
+
+  const fullyBookedDates = useMemo(() => {
+    return (fullyBookedData?.fully_booked_dates ?? []).map((d) => {
+      const dt = new Date(d + 'T00:00:00')
+      return dt
+    })
+  }, [fullyBookedData])
+
+  const { data: availability } = useQuery({
+    queryKey: ['booking-availability', stationId, bookingDate],
+    queryFn: () =>
+      bookingsApi.availability({ date: bookingDate, station_id: Number(stationId) }).then((r) => r.data.data),
+    enabled: !!bookingDate && !!stationId,
+  })
+
+  const fullSlots = new Set(availability?.full_slots ?? [])
+  const allFull = fullSlots.size >= TIME_SLOTS.length
+  const selectedTime = watch('booking_time')
+
+  useEffect(() => {
+    if (allFull && bookingDate) {
+      setValue('booking_time', '')
+    }
+  }, [allFull, bookingDate, setValue])
+
+  useEffect(() => {
+    setValue('booking_time', '')
+  }, [bookingDate, setValue])
+
   const validateCoupon = useMutation({
     mutationFn: () => couponsApi.validate(couponInput, basePrice),
     onSuccess: (res) => {
       setDiscount(res.data.data.discount)
       setCouponError('')
-      toast.success(`Coupon applied! -$${res.data.data.discount}`)
+      toast.success(`Coupon applied! -MAD ${res.data.data.discount}`)
     },
     onError: () => {
       setCouponError('Invalid or inapplicable coupon')
@@ -80,8 +136,6 @@ export function CreateBooking() {
       toast.error(msg ?? 'Failed to create booking')
     },
   })
-
-  const today = new Date().toISOString().split('T')[0]
 
   return (
     <div className="space-y-6 max-w-2xl">
@@ -115,7 +169,7 @@ export function CreateBooking() {
                 <SelectContent>
                   {(services ?? []).map((s) => (
                     <SelectItem key={s.id} value={String(s.id)}>
-                      {s.name} — ${s.price} ({s.duration_minutes} min)
+                      {s.name} — MAD {s.price} ({s.duration_minutes} min)
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -137,10 +191,56 @@ export function CreateBooking() {
 
             <div className="grid grid-cols-2 gap-3">
               <FormField label="Date" error={errors.booking_date?.message} required>
-                <Input type="date" min={today} {...register('booking_date')} />
+                <input type="hidden" {...register('booking_date')} />
+                <DatePicker
+                  value={bookingDate ? new Date(bookingDate + 'T00:00:00') : undefined}
+                  onChange={(d) => setValue('booking_date', d ? format(d, 'yyyy-MM-dd') : '')}
+                  disabledDates={fullyBookedDates}
+                  placeholder="Choose a date"
+                  className={allFull && bookingDate ? 'border-red-400' : ''}
+                />
+                {errors.booking_date && <p className="text-xs text-destructive mt-1">{errors.booking_date.message}</p>}
               </FormField>
               <FormField label="Time" error={errors.booking_time?.message} required>
-                <Input type="time" {...register('booking_time')} />
+                {bookingDate ? (
+                  allFull ? (
+                    <div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                      <CalendarX className="h-4 w-4 shrink-0" />
+                      <span>No time slots available on this date</span>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-3 gap-1.5">
+                      <input type="hidden" {...register('booking_time')} />
+                      {TIME_SLOTS.map((t) => {
+                        const isFull = fullSlots.has(t.value)
+                        return (
+                          <button
+                            key={t.value}
+                            type="button"
+                            disabled={isFull}
+                            onClick={() => !isFull && setValue('booking_time', t.value)}
+                            className={cn(
+                              'rounded border py-1.5 text-xs font-medium transition-all flex flex-col items-center gap-0.5',
+                              isFull
+                                ? 'border-gray-100 bg-gray-50 text-gray-300 cursor-not-allowed'
+                                : selectedTime === t.value
+                                ? 'border-blue-600 bg-blue-600 text-white'
+                                : 'border-gray-200 bg-white text-gray-600 hover:border-blue-400'
+                            )}
+                          >
+                            <span>{t.label}</span>
+                            {isFull && <span className="text-[10px] font-semibold text-red-400">Full</span>}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  )
+                ) : (
+                  <div className="flex items-center gap-2 rounded-lg border border-dashed border-gray-300 px-3 py-2 text-sm text-muted-foreground">
+                    <Clock className="h-4 w-4 shrink-0" />
+                    <span>Select a date first</span>
+                  </div>
+                )}
               </FormField>
             </div>
 
@@ -158,7 +258,7 @@ export function CreateBooking() {
               <div className="flex items-center gap-2">
                 <Badge variant="success" className="gap-1.5 py-1.5 px-3">
                   <Tag className="h-3.5 w-3.5" />
-                  {couponInput} — -${discount}
+                  {couponInput} — -MAD {discount}
                 </Badge>
                 <button
                   type="button"
@@ -197,23 +297,23 @@ export function CreateBooking() {
             <CardContent className="p-5 space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Service</span>
-                <span>${basePrice.toFixed(2)}</span>
+                <span>MAD {basePrice.toFixed(2)}</span>
               </div>
               {discount !== null && (
                 <div className="flex justify-between text-sm text-emerald-600">
                   <span>Discount</span>
-                  <span>-${discount.toFixed(2)}</span>
+                  <span>-MAD {discount.toFixed(2)}</span>
                 </div>
               )}
               <div className="flex justify-between font-bold text-base pt-2 border-t">
                 <span>Total</span>
-                <span>${finalPrice.toFixed(2)}</span>
+                <span>MAD {finalPrice.toFixed(2)}</span>
               </div>
             </CardContent>
           </Card>
         )}
 
-        <Button type="submit" className="w-full" size="lg" loading={createBooking.isPending}>
+        <Button type="submit" className="w-full" size="lg" loading={createBooking.isPending} disabled={allFull && !!bookingDate}>
           Confirm Booking
         </Button>
       </form>

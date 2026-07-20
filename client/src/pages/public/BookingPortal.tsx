@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { useForm, type Resolver } from 'react-hook-form'
@@ -118,7 +118,7 @@ function ServiceCard({ service, selected, onClick }: {
         </div>
         <div className="text-right shrink-0">
           <p className={cn('text-2xl font-bold', selected ? 'text-blue-600' : 'text-gray-900')}>
-            ${parseFloat(service.price).toFixed(0)}
+            MAD {parseFloat(service.price).toFixed(0)}
           </p>
           <p className="text-xs text-gray-400">per wash</p>
         </div>
@@ -187,10 +187,16 @@ export function BookingPortal() {
         .availability(slug!, { date: selectedDate, station_id: selectedStation?.id })
         .then((r) => r.data.data),
     enabled: !!slug && !!selectedDate && !!selectedStation,
-    staleTime: 30_000,
+    refetchInterval: 15_000,
+    staleTime: 5_000,
   })
 
   const fullSlots = new Set(availability?.full_slots ?? [])
+  const allFull = fullSlots.size >= TIME_SLOTS.length
+
+  useEffect(() => {
+    if (allFull) setSelectedTime('')
+  }, [allFull])
 
   const bookMutation = useMutation({
     mutationFn: (info: FormData) => {
@@ -288,11 +294,15 @@ export function BookingPortal() {
             </div>
             <div className="flex justify-between text-sm pt-2 border-t">
               <span className="text-gray-500">Total</span>
-              <span className="font-bold text-blue-600 text-base">${parseFloat(result.total_amount).toFixed(2)}</span>
+              <span className="font-bold text-blue-600 text-base">MAD {parseFloat(result.total_amount).toFixed(2)}</span>
             </div>
           </div>
 
           <p className="text-xs text-gray-400">A confirmation will be sent to your email.</p>
+
+          <Button className="w-full mt-4" variant="outline" onClick={() => navigate('/')}>
+            Back to Home
+          </Button>
         </div>
       </div>
     )
@@ -379,7 +389,7 @@ export function BookingPortal() {
                 <Sparkles className="h-4 w-4 text-blue-600" />
                 <span className="font-medium text-blue-900">{selectedService?.name}</span>
               </div>
-              <span className="font-bold text-blue-600">${parseFloat(selectedService?.price ?? '0').toFixed(2)}</span>
+              <span className="font-bold text-blue-600">MAD {parseFloat(selectedService?.price ?? '0').toFixed(2)}</span>
             </div>
 
             {/* Station */}
@@ -434,30 +444,37 @@ export function BookingPortal() {
                 <p className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
                   <Clock className="h-4 w-4 text-gray-400" /> Time
                 </p>
-                <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
-                  {TIME_SLOTS.map((t) => {
-                    const isFull = fullSlots.has(t.value)
-                    return (
-                      <button
-                        key={t.value}
-                        type="button"
-                        disabled={isFull}
-                        onClick={() => !isFull && setSelectedTime(t.value)}
-                        className={cn(
-                          'rounded-lg border py-2 text-xs font-medium transition-all flex flex-col items-center gap-0.5',
-                          isFull
-                            ? 'border-gray-100 bg-gray-50 text-gray-300 cursor-not-allowed'
-                            : selectedTime === t.value
-                            ? 'border-blue-600 bg-blue-600 text-white'
-                            : 'border-gray-200 bg-white text-gray-600 hover:border-blue-400'
-                        )}
-                      >
-                        <span>{t.label}</span>
-                        {isFull && <span className="text-[10px] font-semibold text-red-400">Full</span>}
-                      </button>
-                    )
-                  })}
-                </div>
+                {allFull ? (
+                  <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-center">
+                    <p className="text-sm font-medium text-red-700">No time slots available on this date</p>
+                    <p className="text-xs text-red-500 mt-1">Please choose another date</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
+                    {TIME_SLOTS.map((t) => {
+                      const isFull = fullSlots.has(t.value)
+                      return (
+                        <button
+                          key={t.value}
+                          type="button"
+                          disabled={isFull}
+                          onClick={() => !isFull && setSelectedTime(t.value)}
+                          className={cn(
+                            'rounded-lg border py-2 text-xs font-medium transition-all flex flex-col items-center gap-0.5',
+                            isFull
+                              ? 'border-gray-100 bg-gray-50 text-gray-300 cursor-not-allowed'
+                              : selectedTime === t.value
+                              ? 'border-blue-600 bg-blue-600 text-white'
+                              : 'border-gray-200 bg-white text-gray-600 hover:border-blue-400'
+                          )}
+                        >
+                          <span>{t.label}</span>
+                          {isFull && <span className="text-[10px] font-semibold text-red-400">Full</span>}
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
               </div>
             )}
 
@@ -467,7 +484,7 @@ export function BookingPortal() {
               </Button>
               <Button
                 className="flex-1"
-                disabled={!selectedStation || !selectedDate || !selectedTime}
+                disabled={!selectedStation || !selectedDate || !selectedTime || allFull}
                 onClick={() => setStep(3)}
               >
                 Continue <ChevronRight className="h-4 w-4 ml-1" />
@@ -500,7 +517,7 @@ export function BookingPortal() {
               </div>
               <div className="flex justify-between border-t pt-2 font-semibold">
                 <span>Total</span>
-                <span className="text-blue-600">${parseFloat(selectedService?.price ?? '0').toFixed(2)}</span>
+                <span className="text-blue-600">MAD {parseFloat(selectedService?.price ?? '0').toFixed(2)}</span>
               </div>
             </div>
 

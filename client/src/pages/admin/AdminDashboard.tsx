@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import {
-  DollarSign, Users, CalendarCheck, CheckCircle, TrendingUp,
-  Link2, Copy, CheckCheck,
+  DollarSign, Users, CheckCircle, Link2, Copy, CheckCheck,
 } from 'lucide-react'
+import { PaymentDialog } from '@/components/shared/PaymentDialog'
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend,
@@ -82,6 +82,7 @@ export function AdminDashboard() {
   const { data, isLoading } = useQuery({
     queryKey: ['dashboard', period],
     queryFn: () => dashboardApi.get(period).then((r) => r.data.data),
+    refetchInterval: 30_000,
   })
 
   const pieData = data
@@ -124,10 +125,10 @@ export function AdminDashboard() {
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <StatCard
           title="Total Revenue"
-          value={isLoading ? '—' : `$${(data?.revenue.total ?? 0).toLocaleString()}`}
+          value={isLoading ? '—' : `MAD ${(data?.revenue.total ?? 0).toLocaleString()}`}
           icon={<DollarSign className="h-5 w-5" />}
           color="green"
-          trend={{ value: 12, label: 'vs last period' }}
+          trend={data?.revenue.total ? { value: data?.revenue.period ?? 0, label: 'vs last period' } : undefined}
         />
         <StatCard
           title="Total Customers"
@@ -209,7 +210,18 @@ export function AdminDashboard() {
                         </p>
                       </div>
                       <BookingStatusBadge status={b.status} />
-                      <span className="font-semibold text-sm">${b.total_amount}</span>
+                      <span className="font-semibold text-sm">MAD {b.total_amount}</span>
+                      {!b.payment && !['pending', 'cancelled'].includes(b.status) && (
+                        <PaymentDialog booking={b}>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="gap-1 text-emerald-600 border-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 h-7 px-2 text-xs"
+                          >
+                            <DollarSign className="h-3 w-3" /> Pay
+                          </Button>
+                        </PaymentDialog>
+                      )}
                     </div>
                   ))}
               {!isLoading && !data?.recent_bookings?.length && (
