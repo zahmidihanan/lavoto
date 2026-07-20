@@ -152,8 +152,8 @@ class BookingController extends Controller
     public function cancel(Request $request, Booking $booking): JsonResponse
     {
         $this->authorize('cancel', $booking);
-        $request->validate(['reason' => 'nullable|string|max:500']);
-        $updated = $this->bookingService->cancel($booking, $request->reason);
+        $request->validate(['cancellation_reason' => 'nullable|string|max:500']);
+        $updated = $this->bookingService->cancel($booking, $request->string('cancellation_reason')->toString());
         return $this->success(new BookingResource($updated));
     }
 }
